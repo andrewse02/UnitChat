@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="/styles/style.css" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap" rel="stylesheet" />
+
+        <title>Unit Chat</title>
+    </head>
+    <body>
+        <div class="container">
+            <div id="overlay"></div>
+
+            <div class="container primary">
+                <header class="container-h center">
+                    <div class="container-h center">
+                        <a href="/"><h3>Unit Chat</h3></a>
+                    </div>
+                    <div class="container-h mid-links center">
+                        <a href="#about">About</a>
+                        <a href="#features">Features</a>
+                        <a href="#contact">Contact</a>
+                    </div>
+                    <div class="container-h center">
+                        <button id="start-chatting" class="neutral-light">Start Chatting</button>
+                    </div>
+                </header>
+            </div>
+
+            <div class="container-h center">
+                <form id="register-form" class="modal container form">
+                    <div class="container-h start">
+                        <h2>Register</h2>
+                    </div>
+                    <div class="container-h form">
+                        <div class="error-message-container">
+                            <input id="register-first-name" type="text" placeholder="First Name" autocomplete="given-name" />
+                        </div>
+                        <div class="error-message-container">
+                            <input id="register-last-name" type="text" placeholder="Last Name" autocomplete="family-name" />
+                        </div>
+                    </div>
+                    <div class="error-message-container">
+                        <input id="register-email" type="text" placeholder="Email Address" autocomplete="email" />
+                    </div>
+                    <div class="error-message-container">
+                        <input id="register-username" type="text" placeholder="Username" autocomplete="username" />
+                    </div>
+                    <div class="container-h form">
+                        <div class="error-message-container">
+                            <input id="register-password" type="password" placeholder="Password" autocomplete="new-password" />
+                        </div>
+                        <div class="error-message-container">
+                            <input id="register-confirm-password" type="password" placeholder="Confirm Password" autocomplete="new-password" />
+                        </div>
+                    </div>
+                    <div class="container">
+                        <h5>Password Requirements</h5>
+                        <p>8-64 Characters</p>
+                        <p>1 Number</p>
+                        <p>1 Lowercase Letter</p>
+                        <p>1 Uppercase Letter</p>
+                    </div>
+                    <div class="container-h form between">
+                        <button id="register-button" class="primary">Register</button>
+                        <p>Have an account already? <a onclick="showLogin()">Login</a></p>
+                    </div>
+                </form>
+
+                <form id="login-form" class="modal container form">
+                    <div class="container-h start">
+                        <h2>Login</h2>
+                    </div>
+                    <div class="container-h form">
+                        <div class="error-message-container">
+                            <input id="login-username" type="text" placeholder="Username" autocomplete="username" />
+                        </div>
+                        <div class="error-message-container">
+                            <input id="login-password" type="password" placeholder="Password" autocomplete="password" />
+                        </div>
+                    </div>
+                    <div class="container-h form between">
+                        <button id="login-button" class="primary">Login</button>
+                        <p>Don't have an account? <a onclick="showRegister()">Register</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <script src="/scripts/axios.min.js"></script>
+        <script src="/scripts/underage-validate.min.js"></script>
+        <script src="/home/home.js"></script>
+    </body>
+</html>

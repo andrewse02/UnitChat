@@ -1,0 +1,303 @@
+$primary: #0AADFF;
+$secondary: #565656;
+$highlight1: #002B6C;
+$highlight2: #4654EE;
+$neutralDark: #1C1D21;
+$middleDark: #393A3C;
+$lightDark: #AAAAAA;
+$neutralLight: #FFFFFF;
+$green: #1CD822;
+$red: #FF1F1F;
+
+* {
+    font-family: 'Roboto Condensed', sans-serif;
+}
+
+body {
+    background-color: $neutralDark;
+    margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+    margin: 2.5px;
+    color: $neutralLight;
+
+    a {
+        cursor: pointer;
+        color: $primary;
+    }
+}
+
+p {
+    font-size: 0.8rem;
+
+    &.error {
+        color: $red;
+    }
+}
+
+a {
+    text-decoration: none;
+
+    &:link, &:active, &:visited {
+        @extend a;
+    }
+
+    &:hover {
+        @extend a;
+        text-decoration: underline;
+    }
+}
+
+div {
+    &#overlay {
+        display: none;
+        position: absolute;
+        height: 100vh;
+        width: 100vw;
+        background-color: rgba($color: #000000, $alpha: 0.5);
+    }
+
+    &.highlight1 {
+        color: $neutralLight;
+        background-color: $highlight1;
+    }
+
+    &.primary {
+        color: $neutralLight;
+        background-color: $primary;
+    }
+}
+
+header {
+    padding: 15px;
+    color: $neutralLight;
+
+    a {
+        @extend a;
+        color: $neutralLight;
+    }
+
+    div.container-h {
+        @extend .container-h;
+        align-items: center;
+    }
+
+    div.mid-links {
+        width: 50vw;
+        gap: 60px;
+    }
+}
+
+section {
+    margin: 10px 0px;
+}
+
+input {
+    height: 24px;
+    width: 220px;
+    border: none;
+    border-radius: 6px;
+    padding: 5px;
+    margin: 0px 2.5px;
+
+    background-color: #565656;
+    color: #FFFFFF;
+
+    &:focus {
+        @extend input;
+        outline: 1px solid #0AADFF;
+    }
+
+    &.error {
+        outline: 1px solid $red;
+    }
+
+    &.success {
+        outline: 1px solid $green;
+    }
+}
+
+::placeholder {
+    color: #FFFFFF;
+    opacity: 0.5;
+}
+
+button {
+    height: 30px;
+    min-width: 100px;
+    text-align: center;
+    line-height: 2.5px;
+    font-size: 1rem;
+    padding: 15px;
+    border-radius: 10px;
+    border: none;
+
+    color: $middleDark;
+
+    &.primary {
+        @extend button;
+        background-color: $primary;
+    }
+
+    &.neutral-light {
+        @extend button;
+        background-color: $neutralLight;
+        color: $primary;
+    }
+
+    &.danger {
+        @extend button;
+        background-color: $red;
+    }
+
+    &:disabled {
+        @extend button;
+        background-color: $middleDark;
+        color: $neutralLight;
+        opacity: 0.75;
+    }
+
+    &:hover {
+        @extend button;
+        cursor: pointer;
+        box-shadow: 0 8px 8px rgba($color: $neutralDark, $alpha: 0.2);
+    }
+    
+    &.close {
+        min-width: 1.25rem;
+        height: 1.25rem;
+        width: 1.25rem;
+        position: absolute;
+        top: 3.5%;
+        right: 2.5%;
+
+        padding: 0;
+        text-align: center;
+
+        background: none;
+        color: $neutralDark;
+        font-size: 1.25rem;
+
+        &:hover {
+            box-shadow: none;
+        }
+    }
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+}
+
+.container-h {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.start {
+    justify-content: flex-start;
+}
+
+.end {
+    justify-content: flex-end;
+}
+
+.center {
+    justify-content: center;
+}
+
+.around {
+    justify-content: space-around;
+}
+
+.between {
+    justify-content: space-between;
+}
+
+.modal {
+    background-color: $middleDark;
+    border-radius: 10px;
+    padding: 35px;
+
+    position: fixed;
+    top: 8vh;
+    display: none;
+    z-index: 1;
+}
+
+.error-message-container {
+    display: flex;
+    flex-direction: column;
+}
+
+#error-message-container {
+    display: flex;
+    flex-direction: column;
+}
+
+#register-form, #login-form {
+    gap: 10px 0px;
+}
+
+#messages-box {
+    height: 495px;
+    width: 700px;
+    border: 0.5px solid $neutralDark;
+    margin: 5px 0;
+    overflow: scroll;
+    position: relative;
+}
+
+#messages {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+
+    li {
+        padding: 8px 16px;
+    }
+
+    // li:nth-child(odd) {
+    //     background-color: #EFEFEF;
+    // }
+}
+
+
+.message {
+    display: flex;
+    justify-content: space-between;
+}
+
+.message-content {
+    max-width: 550px;
+    margin-right: 10px;
+    word-wrap: break-word;
+}
+
+.date-delete {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.date {
+    margin: 0;
+}
+
+.delete {
+    font-size: 12px;
+    margin: 2px 0;
+    color: $red;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+#typing {
+    margin: 14px;
+    margin-top: 5px;
+    font-size: 14px;
+}
