@@ -1,9 +1,9 @@
 $primary: #0AADFF;
-$secondary: #565656;
+$secondary: #494949;
 $highlight1: #002B6C;
 $highlight2: #4654EE;
 $neutralDark: #1C1D21;
-$middleDark: #393A3C;
+$middleDark: #333333;
 $lightDark: #AAAAAA;
 $neutralLight: #FFFFFF;
 $green: #1CD822;
@@ -85,7 +85,7 @@ header {
 
     div.mid-links {
         width: 50vw;
-        gap: 60px;
+        gap: 3rem;
     }
 }
 
@@ -103,6 +103,7 @@ input {
 
     background-color: #565656;
     color: #FFFFFF;
+    font-size: 1rem;
 
     &:focus {
         @extend input;
@@ -120,7 +121,7 @@ input {
 
 ::placeholder {
     color: #FFFFFF;
-    opacity: 0.5;
+    opacity: 0.25;
 }
 
 button {
@@ -200,12 +201,36 @@ button {
     justify-content: flex-start;
 }
 
+.align-start {
+    align-items: flex-start;
+}
+
+.self-start {
+    align-self: flex-start;
+}
+
 .end {
     justify-content: flex-end;
 }
 
+.align-end {
+    align-items: flex-end;
+}
+
+.self-end {
+    align-self: flex-end;
+}
+
 .center {
     justify-content: center;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.self-center {
+    align-self: center;
 }
 
 .around {
@@ -214,6 +239,40 @@ button {
 
 .between {
     justify-content: space-between;
+}
+
+#conversations-section {
+    width: 20vw;
+    min-width: 250px;
+    height: 100vh;
+    background-color: $secondary;
+
+    &.conversation {
+        padding: 15px 25px;
+    }
+}
+
+#messages-section {
+    width: 80vw;
+    height: 100vh;
+    background-color: $middleDark;
+
+    .container {
+        #message-input-container {
+            width: 100%;
+            margin: 0 auto;
+            padding-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            background-color: $middleDark;
+
+            #message-input {
+                width: 90%;
+                padding: 10px 15px;
+                align-self: center;
+            }
+        }
+    }
 }
 
 .modal {
@@ -232,72 +291,61 @@ button {
     flex-direction: column;
 }
 
-#error-message-container {
-    display: flex;
-    flex-direction: column;
-}
-
 #register-form, #login-form {
     gap: 10px 0px;
 }
 
-#messages-box {
-    height: 495px;
-    width: 700px;
-    border: 0.5px solid $neutralDark;
-    margin: 5px 0;
+#messages-container {
+    height: 100%;
     overflow: scroll;
-    position: relative;
 }
-
-#messages {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-
-    li {
-        padding: 8px 16px;
-    }
-
-    // li:nth-child(odd) {
-    //     background-color: #EFEFEF;
-    // }
-}
-
 
 .message {
-    display: flex;
-    justify-content: space-between;
-}
+    @extend .container-h;
+    width: 90%;
+    margin-bottom: 10px;
 
-.message-content {
-    max-width: 550px;
-    margin-right: 10px;
-    word-wrap: break-word;
-}
+    .message-user-info {
+        position: relative;
+        left: -15px;
 
-.date-delete {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
+        .message-img {
+            width: 40px;
+            height: 40px;
+        }
+    }
 
-.date {
-    margin: 0;
-}
+    .message-content {
+        height: 100%;
+        padding-top: 30px;
+        flex: 1;
 
-.delete {
-    font-size: 12px;
-    margin: 2px 0;
-    color: $red;
+        .message-text {
+            margin-right: 20px;
+        }
 
-    &:hover {
-        cursor: pointer;
+        .message-info {
+            min-width: 75px;
+
+            .message-date {
+                white-space: nowrap;
+            }
+
+            .delete-message {
+                background-color: $red;
+                min-width: 0;
+                height: 25px;
+                padding: 0;
+                margin-top: 5px;
+
+                font-size: 0.8rem;
+            }
+        }
     }
 }
 
 #typing {
     margin: 14px;
     margin-top: 5px;
-    font-size: 14px;
+    font-size: 0.8rem;
 }

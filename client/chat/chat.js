@@ -1,53 +1,8 @@
-const htmlBody = document.body;
-
-const loginForm = document.getElementById("login-form");
-const loginUsername = document.getElementById("login-username");
-const loginPassword = document.getElementById("login-password");
-
-const registerForm = document.getElementById("register-form");
-const registerUsername = document.getElementById("register-username");
-const registerPassword = document.getElementById("register-password");
 let messages = [];
 
-const messagesBox = document.createElement("div");
-messagesBox.id = "messages-box";
-const messagesList = document.createElement("ul");
-messagesList.id = "messages";
-
-const typingText = document.createElement("p");
-typingText.id = "typing";
-messagesBox.appendChild(messagesList);
-
-const messagesCreator = document.createElement("form");
-messagesCreator.id = "messages-creator";
-const messageInput = document.createElement("input");
-messageInput.type = "text";
-messageInput.id = "message-input";
-messageInput.placeholder = "Message";
-messageInput.autocomplete = "off";
-const sendButton = document.createElement("button");
-sendButton.id = "send-button";
-sendButton.className = "primary";
-sendButton.textContent = "Send";
-messagesCreator.appendChild(messageInput);
-messagesCreator.appendChild(sendButton);
-
-const changeSection = document.createElement("section");
-changeSection.id = "change-section";
-const changeInput = document.createElement("input");
-changeInput.id = "change-input";
-changeInput.type = "text";
-changeInput.placeholder = "Username";
-changeInput.autocomplete = "off";
-const changeButton = document.createElement("button");
-changeButton.id = "change-button";
-changeButton.textContent = "Change Username";
-changeSection.appendChild(changeInput);
-changeSection.appendChild(changeButton);
-const logoutButton = document.createElement("button");
-logoutButton.id = "logout-button";
-logoutButton.className = "danger";
-logoutButton.textContent = "Logout";
+const messagesContainer = document.getElementById("messages-container");
+const messageInputForm = document.getElementById("message-input-container");
+const messageInput = document.getElementById("message-input");
 
 let socket;
 
@@ -60,20 +15,20 @@ const connect = () => {
     });
     
     socket.emit("auth-request", localStorage.getItem("token"));
-    socket.on("auth-response", (res) => {
+    socket.on("auth-response", async (res) => {
         socket.user = res.user;
-
-        htmlBody.appendChild(messagesBox);
-        htmlBody.appendChild(typingText);
-        htmlBody.appendChild(messagesCreator);
-        htmlBody.appendChild(changeSection);
-        htmlBody.appendChild(logoutButton);
+        await populateMessages(await getMessages());
     });
 
-    socket.emit("refresh-messages");
+    socket.on("message", (message) => {
+        console.log("hit");
+        messagesContainer.appendChild(getNewMessageElement(message));
+    });
 
-    socket.on("refresh-messages", (serverMessages) => {
-        populateMessages(serverMessages, socket);
+    socket.on("delete", (message) => {
+        const found = Array.from(messagesContainer.children).find((child) => +child.dataset.messageId === +message.message_id);
+
+        if(found) messagesContainer.removeChild(found);
     });
 
     socket.on("typing", (typing) => {
@@ -89,148 +44,104 @@ const connect = () => {
 
 const checkLoggedIn = () => {
     if(localStorage.getItem("token")) {
-        htmlBody.removeChild(loginForm);
-        if (htmlBody.contains(registerForm)) {
-            htmlBody.removeChild(registerForm);
-        }
-
         connect();
     }
 }
 
-loginForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    const body = {
-        username: loginUsername.value,
-        password: loginPassword.value
-    };
-
-    loginUsername.value = "";
-    loginPassword.value = "";
-
-    axios
-        .post("/login", body)
-        .then((res) => {
-            localStorage.setItem("token", res.data);
-
-            htmlBody.removeChild(loginForm);
-            if (htmlBody.contains(registerForm)) {
-                htmlBody.removeChild(registerForm);
-            }
-
-            htmlBody.appendChild(messagesBox);
-            htmlBody.appendChild(messagesCreator);
-
-            htmlBody.appendChild(changeSection);
-            htmlBody.appendChild(logoutButton);
-
-            connect();
-        })
-        .catch((error) => {
-            console.log(error);
-            alert(error.response.data);
-        });
-});
-
-registerForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-
-    const body = {
-        username: registerUsername.value,
-        password: registerPassword.value
-    };
-
-    registerUsername.value = "";
-    registerPassword.value = "";
-
-    axios
-        .post("/register", body)
-        .then((res) => {
-            document.querySelector("body").removeChild(registerForm);
-        })
-        .catch((error) => {
-            console.log(error);
-            alert(error.response.data);
-        });
-});
-
-messagesCreator.addEventListener("submit", (event) => {
+messageInputForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     
-    messageInput.value = "";
     socket.emit("message-request", messageInput.value);
+
+    const messages = await getMessages();
+
+    messagesContainer.appendChild(getNewMessageElement({
+        message_id: messages[messages.length - 1].message_id,
+        username: socket.user.username,
+        user_id: socket.user.user_id,
+        text: messageInput.value,
+        created: new Date(Date.now())
+    }));
+    
+    messageInput.value = "";
 });
 
 messageInput.addEventListener("input", (event) => {
-    socket.emit("typing");
+    //socket.emit("typing");
 });
 
-changeButton.addEventListener("click", (event) => {
-    socket.emit("change-request", changeInput.value);
-});
+const getNewMessageElement = (message) => {
+    const newMessage = document.createElement("div");
+    newMessage.setAttribute("class", "message start align-start");
+    newMessage.dataset.messageId = message.message_id;
+    newMessage.dataset.userId = message.user_id;
 
-const populateMessages = (serverMessages, socket) => {
-    while(messagesList.firstChild) {
-        messagesList.removeChild(messagesList.firstChild);
+    const userInfo = document.createElement("div");
+    userInfo.setAttribute("class", "message-user-info container align-start");
+
+    const username = document.createElement("p");
+    username.textContent = message.username;
+    userInfo.appendChild(username);
+
+    const userImg = document.createElement("img");
+    userImg.setAttribute("class", "message-img");
+    // Set to actual pfp
+    userImg.setAttribute("src", "../img/UnitChat-logo.svg");
+    userInfo.appendChild(userImg);
+    newMessage.appendChild(userInfo);
+
+    const messageContent = document.createElement("div");
+    messageContent.setAttribute("class", "message-content container-h between align-start");
+
+    const messageText = document.createElement("p");
+    messageText.setAttribute("class", "message-text");
+    messageText.textContent = message.text;
+    messageContent.appendChild(messageText);
+
+    const messageInfo = document.createElement("div");
+    messageInfo.setAttribute("class", "message-info container");
+
+    const date = document.createElement("p");
+    date.setAttribute("class", "message-date");
+    date.textContent = message.created.toLocaleTimeString?.() || new Date(message.created).toLocaleTimeString();
+    messageInfo.appendChild(date);
+
+    if(+socket.user.user_id === +message.user_id) {
+        const deleteButton = document.createElement("button");
+
+        deleteButton.setAttribute("class", "delete-message");
+        deleteButton.textContent = "Delete";
+        deleteButton.addEventListener("click", (event) => {
+            deleteMessage(message.message_id);
+        });
+
+        messageInfo.appendChild(deleteButton);
     }
 
-    messages = [];
+    messageContent.appendChild(messageInfo);
+    newMessage.appendChild(messageContent);
 
-    for (let i = 0; i < serverMessages.length; i++) {
-        const { id, username, userID, message, date } = serverMessages[i];
+    return newMessage;
+};
 
-        if (!messages.find((element) => element.id === id)) {
-            const messageElement = document.createElement("div");
-            messageElement.className = "message";
-
-            const messageContent = document.createElement("p");
-            messageContent.className = "message-content";
-            messageContent.textContent = `[${username}]: ${message}`;
-
-            const dateDelete = document.createElement("div");
-            dateDelete.className = "date-delete";
-
-            const dateElement = document.createElement("p");
-            dateElement.className = "date";
-            dateElement.textContent = `${new Date(date).toLocaleTimeString()}`;
-
-            dateDelete.appendChild(dateElement);
-
-            if(socket && +userID === +socket.user.id) {
-                const deleteElement = document.createElement("p");
-                deleteElement.className = "delete";
-                deleteElement.textContent = "Delete";
-
-                deleteElement.addEventListener("click", (event) => {
-                    deleteMessage(id);
-                });
-                
-                dateDelete.appendChild(deleteElement);
-            }
-
-            messageElement.appendChild(messageContent);
-            messageElement.appendChild(dateDelete);
-
-            const messageHTML = `
-            <div class="message">
-                <p class="message-content">[${username}]: ${message}</p>
-                <div class="date-delete">
-                    <p class="date">${new Date(date).toLocaleTimeString()}</p>
-                    <p class="delete" onclick="deleteMessage(${id})">Delete</p>
-                </div>
-            </div>
-            `;
-
-            const newMessage = document.createElement("li");
-            newMessage.appendChild(messageElement);
-
-            messagesList.appendChild(newMessage);
-
-            messages.push(serverMessages[i]);
-            window.scrollTo(0, messagesBox.scrollHeight);
-        }
+const getMessages = async () => {
+    try {
+        const {data: response} = await axios.get("/messages", {headers: {"Authorization": "Bearer " + localStorage.getItem("token")}});
+        return response;
+    } catch (error) {
+        console.log(error);
     }
+};
+
+const populateMessages = (messages) => {
+    const fragment = new DocumentFragment();
+
+    for(let i = 0; i < messages.length; i++) {
+        fragment.appendChild(getNewMessageElement(messages[i]));
+    }
+
+    messagesContainer.appendChild(fragment);
+    messagesContainer.scroll(0, messagesContainer.scrollHeight);
 };
 
 const deleteMessage = (id) => {
@@ -242,6 +153,7 @@ const logout = (event) => {
     location.reload();
 };
 
-logoutButton.addEventListener("click", logout);
-
-window.onload = checkLoggedIn;
+window.onload = () => {
+    checkLoggedIn();
+    messagesContainer.scroll(0, messagesContainer.scrollHeight);
+}

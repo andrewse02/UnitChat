@@ -7,6 +7,10 @@
         <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap" rel="stylesheet" />
 
         <title>Unit Chat</title>
+
+        <script src="/scripts/axios.min.js" defer></script>
+        <script src="/scripts/underage-validate.min.js" defer></script>
+        <script src="/home/home.js" defer></script>
     </head>
     <body>
         <div class="container">
@@ -33,7 +37,7 @@
                     <div class="container-h start">
                         <h2>Register</h2>
                     </div>
-                    <div class="container-h form">
+                    <div class="container-h form align-start">
                         <div class="error-message-container">
                             <input id="register-first-name" type="text" placeholder="First Name" autocomplete="given-name" />
                         </div>
@@ -87,9 +91,5 @@
                 </form>
             </div>
         </div>
-        
-        <script src="/scripts/axios.min.js"></script>
-        <script src="/scripts/underage-validate.min.js"></script>
-        <script src="/home/home.js"></script>
     </body>
 </html>

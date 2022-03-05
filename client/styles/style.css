@@ -60,7 +60,7 @@ header a:link, header a:active, header a:visited, header a:hover, header a {
   color: #FFFFFF;
 }
 
-header div.container-h {
+header div.container-h, header div.message {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
@@ -68,7 +68,7 @@ header div.container-h {
 
 header div.mid-links {
   width: 50vw;
-  gap: 60px;
+  gap: 3rem;
 }
 
 section {
@@ -84,6 +84,7 @@ input, input:focus {
   margin: 0px 2.5px;
   background-color: #565656;
   color: #FFFFFF;
+  font-size: 1rem;
 }
 
 input:focus {
@@ -100,22 +101,22 @@ input.success {
 
 ::-webkit-input-placeholder {
   color: #FFFFFF;
-  opacity: 0.5;
+  opacity: 0.25;
 }
 
 :-ms-input-placeholder {
   color: #FFFFFF;
-  opacity: 0.5;
+  opacity: 0.25;
 }
 
 ::-ms-input-placeholder {
   color: #FFFFFF;
-  opacity: 0.5;
+  opacity: 0.25;
 }
 
 ::placeholder {
   color: #FFFFFF;
-  opacity: 0.5;
+  opacity: 0.25;
 }
 
 button, button.primary, button.neutral-light, button.danger, button:disabled, button:hover {
@@ -127,7 +128,7 @@ button, button.primary, button.neutral-light, button.danger, button:disabled, bu
   padding: 15px;
   border-radius: 10px;
   border: none;
-  color: #393A3C;
+  color: #333333;
 }
 
 button.primary {
@@ -144,7 +145,7 @@ button.danger {
 }
 
 button:disabled {
-  background-color: #393A3C;
+  background-color: #333333;
   color: #FFFFFF;
   opacity: 0.75;
 }
@@ -184,7 +185,7 @@ button.close:hover {
           flex-direction: column;
 }
 
-.container-h, header div.container-h {
+.container-h, header div.container-h, .message {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -203,16 +204,50 @@ button.close:hover {
           justify-content: flex-start;
 }
 
+.align-start {
+  -webkit-box-align: start;
+      -ms-flex-align: start;
+          align-items: flex-start;
+}
+
+.self-start {
+  -ms-flex-item-align: start;
+      align-self: flex-start;
+}
+
 .end {
   -webkit-box-pack: end;
       -ms-flex-pack: end;
           justify-content: flex-end;
 }
 
+.align-end {
+  -webkit-box-align: end;
+      -ms-flex-align: end;
+          align-items: flex-end;
+}
+
+.self-end {
+  -ms-flex-item-align: end;
+      align-self: flex-end;
+}
+
 .center {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
+}
+
+.align-center {
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+.self-center {
+  -ms-flex-item-align: center;
+      -ms-grid-row-align: center;
+      align-self: center;
 }
 
 .around {
@@ -226,8 +261,42 @@ button.close:hover {
           justify-content: space-between;
 }
 
+#conversations-section {
+  width: 20vw;
+  min-width: 250px;
+  height: 100vh;
+  background-color: #494949;
+}
+
+#conversations-section.conversation {
+  padding: 15px 25px;
+}
+
+#messages-section {
+  width: 80vw;
+  height: 100vh;
+  background-color: #333333;
+}
+
+#messages-section .container #message-input-container {
+  width: 100%;
+  margin: 0 auto;
+  padding-bottom: 15px;
+  position: relative;
+  z-index: 1;
+  background-color: #333333;
+}
+
+#messages-section .container #message-input-container #message-input {
+  width: 90%;
+  padding: 10px 15px;
+  -ms-flex-item-align: center;
+      -ms-grid-row-align: center;
+      align-self: center;
+}
+
 .modal {
-  background-color: #393A3C;
+  background-color: #333333;
   border-radius: 10px;
   padding: 35px;
   position: fixed;
@@ -246,84 +315,62 @@ button.close:hover {
           flex-direction: column;
 }
 
-#error-message-container {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
-}
-
 #register-form, #login-form {
   gap: 10px 0px;
 }
 
-#messages-box {
-  height: 495px;
-  width: 700px;
-  border: 0.5px solid #1C1D21;
-  margin: 5px 0;
+#messages-container {
+  height: 100%;
   overflow: scroll;
-  position: relative;
-}
-
-#messages {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-}
-
-#messages li {
-  padding: 8px 16px;
 }
 
 .message {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-pack: justify;
-      -ms-flex-pack: justify;
-          justify-content: space-between;
+  width: 90%;
+  margin-bottom: 10px;
 }
 
-.message-content {
-  max-width: 550px;
-  margin-right: 10px;
-  word-wrap: break-word;
+.message .message-user-info {
+  position: relative;
+  left: -15px;
 }
 
-.date-delete {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
-  -webkit-box-pack: center;
-      -ms-flex-pack: center;
-          justify-content: center;
+.message .message-user-info .message-img {
+  width: 40px;
+  height: 40px;
 }
 
-.date {
-  margin: 0;
+.message .message-content {
+  height: 100%;
+  padding-top: 30px;
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
 }
 
-.delete {
-  font-size: 12px;
-  margin: 2px 0;
-  color: #FF1F1F;
+.message .message-content .message-text {
+  margin-right: 20px;
 }
 
-.delete:hover {
-  cursor: pointer;
+.message .message-content .message-info {
+  min-width: 75px;
+}
+
+.message .message-content .message-info .message-date {
+  white-space: nowrap;
+}
+
+.message .message-content .message-info .delete-message {
+  background-color: #FF1F1F;
+  min-width: 0;
+  height: 25px;
+  padding: 0;
+  margin-top: 5px;
+  font-size: 0.8rem;
 }
 
 #typing {
   margin: 14px;
   margin-top: 5px;
-  font-size: 14px;
+  font-size: 0.8rem;
 }
 /*# sourceMappingURL=style.css.map */

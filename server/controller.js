@@ -15,6 +15,8 @@ const sequelize = new Sequelize(connection_string, {
     }
 });
 
+let io;
+
 const port = process.env.PORT || 4000;
 
 const users = [];
@@ -41,27 +43,19 @@ const login = (req, res) => {
     WHERE lower(username) = ${username.toLowerCase()};`)
     .then(async (dbRes) => {
         if(!dbRes[0][0]) return res.status(401).send("Username or password is incorrect!");
-        console.log(dbRes[0][0]);
 
         const matches = await bcrypt.compareSync(password, dbRes[0][0].password);
-        console.log(password, dbRes[0][0].password, matches);
         if(!matches) return res.status(401).send("Username or password is incorrect!");
 
-        return res.status(200).send(jwt.sign({ password, ...dbRes[0][0] }, secret));
+        const censored = {...dbRes[0][0]};
+        delete censored.password;
+
+        return res.status(200).send(jwt.sign(censored, secret));
     })
     .catch((error) => {
         console.log(error);
         return res.sendStatus(500);
     });
-
-    // for (let i = 0; i < users.length; i++) {
-    //     if (users[i].username.toLowerCase() !== username.toLowerCase()) continue;
-
-    //     const matches = bcrypt.compareSync(password, users[i].password);
-    //     if (!matches) return res.status(400).send("Incorrect password!");
-        
-    //     return res.status(200).send(users[i].token);
-    // }
 };
 
 const register = (req, res) => {
@@ -94,7 +88,10 @@ const register = (req, res) => {
     VALUES(${first}, ${last}, ${email}, ${username}, '${password}', NOW())
     RETURNING *;`)
     .then((dbRes) => {
-        return res.status(200).send(jwt.sign({ password, ...dbRes[0] }, secret));
+        const censored = {...dbRes[0][0]};
+        delete censored.password;
+        
+        return res.status(200).send(jwt.sign(censored, secret));
     })
     .catch((error) => {
         console.log(error);
@@ -105,7 +102,7 @@ const register = (req, res) => {
 const changeUsername = (socket, username) => {
     if(!username) return { error: "No username input!" };
 
-    const foundIndex = users.findIndex((user) => +user.id === +socket.user.id);
+    const foundIndex = users.findIndex((user) => +user.id === +socket.user.user_id);
 
     if(!users[foundIndex]) return { error: "User not found!" };
     
@@ -118,15 +115,47 @@ const changeUsername = (socket, username) => {
     return censored;
 };
 
-const deleteMessage = (socket, id) => {
-    if (!id) return { error: "ID not input!" };
+const fetchMessages = () => {
+    let result;
 
-    const foundMessage = messages.find((message) => +message.id === +id);
+    sequelize.query(`
+    SELECT * FROM messages;`)
+    .then((dbRes) => {
+        result = dbRes[0];
+    })
+    .catch((error) => {
+        return console.log(error);
+    });
 
-    if (!foundMessage) return { error: "Message does not exist!" };
-    if (+foundMessage.userID !== +socket.user.id) return { error: "You did not send this message!" };
-    
-    return messages.splice(messages.indexOf(foundMessage), 1);
+    return result;
+}
+
+const getMessages = (req, res) => {
+    sequelize.query(`
+    SELECT * FROM messages;`)
+    .then((dbRes) => {
+        return res.status(200).send(dbRes[0]);
+    })
+    .catch((error) => {
+        console.log(error);
+        return res.sendStatus(500);
+    });
+};
+
+const deleteMessage = async (socket, id) => {
+    if (!id) return socket.emit("error", "ID not input!");
+
+    sequelize.query(`
+    DELETE FROM messages
+    WHERE message_id = ${id} AND user_id = ${socket.user.user_id}
+    RETURNING *;`)
+    .then((dbRes) => {
+        io.emit("delete", dbRes[0][0]);
+    })
+    .catch((error) => {
+        console.log(error);
+        socket.emit("error", error);
+    });
 };
 
 const authorizeUser = (req, res, next) => {
@@ -143,11 +172,11 @@ const authorizeUser = (req, res, next) => {
 };
 
 const onConnection = (socket) => {
-    const io = require("./index.js").io;
+    io = require("./index.js").io;
 
     console.log("A client has connected.");
     
-    socket.on("auth-request", (recievedToken) => {
+    socket.on("auth-request", async (recievedToken) => {
         const authResponse = authorizeSocket(recievedToken);
         if (authResponse.error) {
             socket.emit("error", authResponse.error);
@@ -161,37 +190,38 @@ const onConnection = (socket) => {
         socket.emit("auth-response", { error: null, user: censored});
     });
 
-    socket.on("refresh-messages", () => {
-        const authResponse = authorizeSocket(socket.user.token);
-        if(authResponse.error) return socket.emit("error", authResponse.error);
-
-        socket.emit("refresh-messages", messages);
-    });
-
     socket.on("message-request", (message) => {
         const authResponse = authorizeSocket(socket.user.token);
         if(authResponse.error) return socket.emit("error", authResponse.error);
 
+        message = sequelize.escape(message);
+
         const newMessage = {
-            id: messages.length + 1,
-            username: authResponse.user.username,
-            userID: authResponse.user.id,
-            message,
-            date: new Date(Date.now())
+            username: sequelize.escape(socket.user.username),
+            userId: socket.user.user_id,
+            text: message,
+            date: new Date(Date.now()).toString(),
         };
 
-        messages.push(newMessage);
-        io.emit("refresh-messages", messages);
+        sequelize.query(`
+        INSERT INTO messages (username, user_id, text, created)
+        VALUES(${newMessage.username}, ${newMessage.userId}, ${newMessage.text}, NOW())
+        RETURNING *;`)
+        .then((dbRes) => {
+            socket.broadcast.emit("message", { id: dbRes[0][0].message_id, ...newMessage });
+        })
+        .catch((error) => {
+            console.log(error);
+            socket.emit("error", error);
+        });
     });
 
-    socket.on("delete-request", (id) => {
+    socket.on("delete-request", async (id) => {
         const authResponse = authorizeSocket(socket.user.token);
         if(authResponse.error) return socket.emit("error", authResponse.error);
 
-        const deleteResponse = deleteMessage(socket, id);
-        if(deleteResponse.error) return socket.emit("error", deleteResponse.error);
-        
-        io.emit("refresh-messages", messages);
+        await deleteMessage(socket, id);
+        socket.broadcast.emit("delete", id);
     });
 
     socket.on("typing", () => {
@@ -268,6 +298,7 @@ module.exports = {
     login,
     register,
     changeUsername,
+    getMessages,
     deleteMessage,
     authorizeUser,
     onConnection

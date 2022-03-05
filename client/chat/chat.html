@@ -4,12 +4,26 @@
         <link rel="stylesheet" href="/styles/style.css" />
 
         <title>Unit Chat</title>
-    </head>
-    <body class="container">
-        <h1>Unit Chat</h1>
 
-        <script src="/scripts/axios.min.js"></script>
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="/chat/chat.js"></script>
+        <script src="/scripts/axios.min.js" defer></script>
+        <script src="/socket.io/socket.io.js" defer></script>
+        <script src="/chat/chat.js" defer></script>
+    </head>
+    <body>
+        <div class="container-h">
+            <div id="conversations-section" class="container">
+                <div class="container conversation">
+                    
+                </div>
+            </div>
+            <div id="messages-section" class="container end">
+                <div id="messages-container" class="container start align-center"></div>
+                <div class="container">
+                    <form id="message-input-container" class="container start align-center">
+                        <input id="message-input" type="text" placeholder="Message" autocomplete="off"/>
+                    </form>
+                </div>
+            </div>
+        </div>
     </body>
 </html>

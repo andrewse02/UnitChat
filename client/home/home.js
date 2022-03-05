@@ -57,10 +57,8 @@ const validator = new UnderageValidate({
         message: "Passwords do not match!"
     });
 
-const checkLoggedIn = () => {
-    if(localStorage.getItem("token")) {
-        window.location.replace("/chat");
-    }
+const isLoggedIn = () => {
+    return !!localStorage.getItem("token");
 };
 
 const showRegister = () => {
@@ -82,7 +80,8 @@ const hideForms = () => {
 }
 
 startChatting.addEventListener("click", (event) => {
-    showRegister()
+    if(isLoggedIn()) return window.location.href = "/chat";
+    showRegister();
 });
 
 overlay.addEventListener("click", (event) => {
@@ -100,8 +99,6 @@ registerForm.addEventListener("submit", async (event) => {
 loginForm.addEventListener("submit", async (event) => {
     loginEvent(event);
 });
-
-window.onload = checkLoggedIn;
 
 const register = (event) => {
     event.preventDefault();

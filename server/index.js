@@ -23,6 +23,8 @@ app.post("/register", controller.register);
 
 app.put("/users", controller.authorizeUser, controller.changeUsername);
 
+app.get("/messages", controller.authorizeUser, controller.getMessages);
+
 io.on("connection", controller.onConnection);
 
 server.listen(controller.port, () => {
