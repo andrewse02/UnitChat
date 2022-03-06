@@ -7,20 +7,30 @@
 
         <script src="/scripts/axios.min.js" defer></script>
         <script src="/socket.io/socket.io.js" defer></script>
+        <script src="/scripts/moment.js" defer></script>
         <script src="/chat/chat.js" defer></script>
     </head>
     <body>
         <div class="container-h">
-            <div id="conversations-section" class="container">
-                <div class="container conversation">
-                    
+            <div id="conversations-section" class="container align-center">
+                <div class="conversation start align-center" data-user-id="1">
+                    <img class="conversation-img" src="../img/UnitChat-logo.svg" />
+                    <h4>Username</h4>
+                </div>
+                <div class="conversation start align-center" data-user-id="1">
+                    <img class="conversation-img" src="../img/UnitChat-logo.svg" />
+                    <h4>Username</h4>
+                </div>
+                <div class="conversation start align-center" data-user-id="1">
+                    <img class="conversation-img" src="../img/UnitChat-logo.svg" />
+                    <h4>Username</h4>
                 </div>
             </div>
             <div id="messages-section" class="container end">
                 <div id="messages-container" class="container start align-center"></div>
                 <div class="container">
                     <form id="message-input-container" class="container start align-center">
-                        <input id="message-input" type="text" placeholder="Message" autocomplete="off"/>
+                        <input id="message-input" type="text" placeholder="Message" autocomplete="off" />
                     </form>
                 </div>
             </div>

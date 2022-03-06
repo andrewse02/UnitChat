@@ -1,3 +1,25 @@
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url("/styles/fonts/icons.woff2") format("woff2");
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
+
 * {
   font-family: 'Roboto Condensed', sans-serif;
 }
@@ -60,7 +82,7 @@ header a:link, header a:active, header a:visited, header a:hover, header a {
   color: #FFFFFF;
 }
 
-header div.container-h, header div.message {
+header div.container-h, header div.conversation, header div.message {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
@@ -185,7 +207,7 @@ button.close:hover {
           flex-direction: column;
 }
 
-.container-h, header div.container-h, .message {
+.container-h, header div.container-h, .conversation, .message {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -288,7 +310,7 @@ button.close:hover {
 }
 
 #messages-section .container #message-input-container #message-input {
-  width: 90%;
+  width: 80%;
   padding: 10px 15px;
   -ms-flex-item-align: center;
       -ms-grid-row-align: center;
@@ -300,7 +322,7 @@ button.close:hover {
   border-radius: 10px;
   padding: 35px;
   position: fixed;
-  top: 8vh;
+  top: 60px;
   display: none;
   z-index: 1;
 }
@@ -316,7 +338,7 @@ button.close:hover {
 }
 
 #register-form, #login-form {
-  gap: 10px 0px;
+  gap: 10px 0;
 }
 
 #messages-container {
@@ -324,14 +346,35 @@ button.close:hover {
   overflow: scroll;
 }
 
-.message {
-  width: 90%;
-  margin-bottom: 10px;
+#conversations-section {
+  overflow: scroll;
 }
 
-.message .message-user-info {
-  position: relative;
-  left: -15px;
+.conversation {
+  width: calc(100% - 4px);
+  gap: 0 15px;
+}
+
+.conversation:first-child {
+  margin-top: 2px;
+}
+
+.conversation.selected, .conversation:hover {
+  outline: 2px solid #0AADFF;
+}
+
+.conversation .conversation-img {
+  width: 3.5rem;
+  height: 3.5rem;
+  padding: 1rem;
+}
+
+.message {
+  width: 75%;
+  margin-bottom: 10px;
+  background-color: #4654EE;
+  border-radius: 1.5rem;
+  padding: 0.8rem;
 }
 
 .message .message-user-info .message-img {
@@ -340,8 +383,8 @@ button.close:hover {
 }
 
 .message .message-content {
-  height: 100%;
-  padding-top: 30px;
+  min-height: 50%;
+  margin-top: 30px;
   -webkit-box-flex: 1;
       -ms-flex: 1;
           flex: 1;
@@ -351,16 +394,18 @@ button.close:hover {
   margin-right: 20px;
 }
 
-.message .message-content .message-info {
+.message .message-info {
   min-width: 75px;
+  min-height: 50px;
 }
 
-.message .message-content .message-info .message-date {
+.message .message-info .message-date {
   white-space: nowrap;
 }
 
-.message .message-content .message-info .delete-message {
-  background-color: #FF1F1F;
+.message .message-info .delete-message {
+  background: none;
+  color: #FF1F1F;
   min-width: 0;
   height: 25px;
   padding: 0;

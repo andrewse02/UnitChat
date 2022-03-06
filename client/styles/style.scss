@@ -9,6 +9,28 @@ $neutralLight: #FFFFFF;
 $green: #1CD822;
 $red: #FF1F1F;
 
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: url("/styles/fonts/icons.woff2") format('woff2');
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
+
 * {
     font-family: 'Roboto Condensed', sans-serif;
 }
@@ -267,7 +289,7 @@ button {
             background-color: $middleDark;
 
             #message-input {
-                width: 90%;
+                width: 80%;
                 padding: 10px 15px;
                 align-self: center;
             }
@@ -281,7 +303,7 @@ button {
     padding: 35px;
 
     position: fixed;
-    top: 8vh;
+    top: 60px;
     display: none;
     z-index: 1;
 }
@@ -292,7 +314,7 @@ button {
 }
 
 #register-form, #login-form {
-    gap: 10px 0px;
+    gap: 10px 0;
 }
 
 #messages-container {
@@ -300,15 +322,39 @@ button {
     overflow: scroll;
 }
 
+#conversations-section {
+    overflow: scroll;
+}
+
+.conversation {
+    @extend .container-h;
+    width: calc(100% - 4px);
+    gap: 0 15px;
+
+    &:first-child {
+        margin-top: 2px;
+    }
+    
+    &.selected, &:hover {
+        outline: 2px solid $primary;
+    }
+
+    .conversation-img {
+        width: 3.5rem;
+        height: 3.5rem;
+        padding: 1rem;
+    }
+}
+
 .message {
     @extend .container-h;
-    width: 90%;
+    width: 75%;
     margin-bottom: 10px;
+    background-color: $highlight2;
+    border-radius: 1.5rem;
+    padding: 0.8rem;
 
     .message-user-info {
-        position: relative;
-        left: -15px;
-
         .message-img {
             width: 40px;
             height: 40px;
@@ -316,30 +362,32 @@ button {
     }
 
     .message-content {
-        height: 100%;
-        padding-top: 30px;
+        min-height: 50%;
+        margin-top: 30px;
         flex: 1;
 
         .message-text {
             margin-right: 20px;
         }
+    }
 
-        .message-info {
-            min-width: 75px;
+    .message-info {
+        min-width: 75px;
+        min-height: 50px;
 
-            .message-date {
-                white-space: nowrap;
-            }
+        .message-date {
+            white-space: nowrap;
+        }
 
-            .delete-message {
-                background-color: $red;
-                min-width: 0;
-                height: 25px;
-                padding: 0;
-                margin-top: 5px;
+        .delete-message {
+            background: none;
+            color: $red;
+            min-width: 0;
+            height: 25px;
+            padding: 0;
+            margin-top: 5px;
 
-                font-size: 0.8rem;
-            }
+            font-size: 0.8rem;
         }
     }
 }

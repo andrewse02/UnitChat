@@ -50,6 +50,8 @@ const checkLoggedIn = () => {
 
 messageInputForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+
+    if(messageInput.value === "") return;
     
     socket.emit("message-request", messageInput.value);
 
@@ -91,7 +93,7 @@ const getNewMessageElement = (message) => {
     newMessage.appendChild(userInfo);
 
     const messageContent = document.createElement("div");
-    messageContent.setAttribute("class", "message-content container-h between align-start");
+    messageContent.setAttribute("class", "message-content container-h align-start");
 
     const messageText = document.createElement("p");
     messageText.setAttribute("class", "message-text");
@@ -99,27 +101,33 @@ const getNewMessageElement = (message) => {
     messageContent.appendChild(messageText);
 
     const messageInfo = document.createElement("div");
-    messageInfo.setAttribute("class", "message-info container");
+    messageInfo.setAttribute("class", "message-info container align-end");
 
     const date = document.createElement("p");
     date.setAttribute("class", "message-date");
-    date.textContent = message.created.toLocaleTimeString?.() || new Date(message.created).toLocaleTimeString();
+    date.textContent = moment(new Date(message.created)).format("h:mm a")
     messageInfo.appendChild(date);
 
     if(+socket.user.user_id === +message.user_id) {
         const deleteButton = document.createElement("button");
 
         deleteButton.setAttribute("class", "delete-message");
-        deleteButton.textContent = "Delete";
         deleteButton.addEventListener("click", (event) => {
             deleteMessage(message.message_id);
         });
 
-        messageInfo.appendChild(deleteButton);
+        const deleteIcon = document.createElement("span");
+        deleteIcon.setAttribute("class", "material-icons");
+        deleteIcon.textContent = "delete"
+
+        deleteButton.appendChild(deleteIcon);
+
+        newMessage.addEventListener("mouseenter", () => messageInfo.appendChild(deleteButton));
+        newMessage.addEventListener("mouseleave", () => messageInfo.removeChild(deleteButton));
     }
 
-    messageContent.appendChild(messageInfo);
     newMessage.appendChild(messageContent);
+    newMessage.appendChild(messageInfo);
 
     return newMessage;
 };

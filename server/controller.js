@@ -119,7 +119,8 @@ const fetchMessages = () => {
     let result;
 
     sequelize.query(`
-    SELECT * FROM messages;`)
+    SELECT * FROM messages;
+    ORDER BY message_id ASC;`)
     .then((dbRes) => {
         result = dbRes[0];
     })
@@ -132,7 +133,8 @@ const fetchMessages = () => {
 
 const getMessages = (req, res) => {
     sequelize.query(`
-    SELECT * FROM messages;`)
+    SELECT * FROM messages
+    ORDER BY message_id ASC;`)
     .then((dbRes) => {
         return res.status(200).send(dbRes[0]);
     })
@@ -194,18 +196,16 @@ const onConnection = (socket) => {
         const authResponse = authorizeSocket(socket.user.token);
         if(authResponse.error) return socket.emit("error", authResponse.error);
 
-        message = sequelize.escape(message);
-
         const newMessage = {
-            username: sequelize.escape(socket.user.username),
+            username: socket.user.username,
             userId: socket.user.user_id,
             text: message,
-            date: new Date(Date.now()).toString(),
+            created: new Date(Date.now()).toString(),
         };
 
         sequelize.query(`
         INSERT INTO messages (username, user_id, text, created)
-        VALUES(${newMessage.username}, ${newMessage.userId}, ${newMessage.text}, NOW())
+        VALUES(${sequelize.escape(newMessage.username)}, ${newMessage.userId}, ${sequelize.escape(newMessage.text)}, NOW())
         RETURNING *;`)
         .then((dbRes) => {
             socket.broadcast.emit("message", { id: dbRes[0][0].message_id, ...newMessage });
