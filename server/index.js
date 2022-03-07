@@ -15,6 +15,8 @@ const io = new Server(server);
 
 app.get("/", controller.serveHome);
 
+app.get("/auth", controller.checkAuth);
+
 app.get("/chat", controller.serveChat);
 
 app.post("/login", controller.login);
@@ -23,7 +25,9 @@ app.post("/register", controller.register);
 
 app.put("/users", controller.authorizeUser, controller.changeUsername);
 
-app.get("/messages", controller.authorizeUser, controller.getMessages);
+app.get("/conversations", controller.authorizeUser, controller.getConversations);
+
+app.get("/messages/:id", controller.authorizeUser, controller.getMessages);
 
 io.on("connection", controller.onConnection);
 

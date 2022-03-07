@@ -82,7 +82,7 @@ header a:link, header a:active, header a:visited, header a:hover, header a {
   color: #FFFFFF;
 }
 
-header div.container-h, header div.conversation, header div.message {
+header div.container-h, header div.conversation, header div.message, header .message div.message-bubble, .message header div.message-bubble {
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
@@ -207,7 +207,7 @@ button.close:hover {
           flex-direction: column;
 }
 
-.container-h, header div.container-h, .conversation, .message {
+.container-h, header div.container-h, .conversation, .message, .message .message-bubble {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -372,9 +372,6 @@ button.close:hover {
 .message {
   width: 75%;
   margin-bottom: 10px;
-  background-color: #4654EE;
-  border-radius: 1.5rem;
-  padding: 0.8rem;
 }
 
 .message .message-user-info .message-img {
@@ -382,28 +379,67 @@ button.close:hover {
   height: 40px;
 }
 
-.message .message-content {
+.message .message-bubble {
+  background-color: #0AADFF;
+  border-radius: 1rem;
+  padding: 0.5rem 0.8rem;
+  margin: 0 20px;
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+}
+
+.message .message-bubble form {
+  -webkit-box-flex: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1;
+}
+
+.message .message-bubble form input {
+  height: 24px;
+  width: 95%;
+  border: none;
+  border-radius: 6px;
+  padding: 5px;
+  margin: 0px 2.5px;
+  background-color: #565656;
+  color: #FFFFFF;
+  font-size: 0.8rem;
+}
+
+.message .message-bubble .message-content {
   min-height: 50%;
-  margin-top: 30px;
+  margin: 0 20px;
   -webkit-box-flex: 1;
       -ms-flex: 1;
           flex: 1;
 }
 
-.message .message-content .message-text {
-  margin-right: 20px;
+.message .message-bubble .message-content .message-text {
+  word-break: break-all;
+  white-space: normal;
 }
 
-.message .message-info {
+.message .message-bubble .message-info {
   min-width: 75px;
   min-height: 50px;
 }
 
-.message .message-info .message-date {
+.message .message-bubble .message-info .message-date {
   white-space: nowrap;
 }
 
-.message .message-info .delete-message {
+.message .message-bubble .message-info .edit-message {
+  background: none;
+  color: #494949;
+  min-width: 0;
+  height: 25px;
+  padding: 0;
+  margin-top: 5px;
+  font-size: 0.8rem;
+}
+
+.message .message-bubble .message-info .delete-message {
   background: none;
   color: #FF1F1F;
   min-width: 0;

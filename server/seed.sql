@@ -55,3 +55,6 @@ CREATE TABLE username_changes(
   user_id INTEGER NOT NULL REFERENCES users(user_id),
   last_changed TIMESTAMPTZ NOT NULL
 );
+
+INSERT INTO groups(name, private, created)
+VALUES('Global', false, NOW());

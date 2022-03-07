@@ -71,6 +71,7 @@ const register = (req, res) => {
     username = sequelize.escape(username);
     password = bcrypt.hashSync(password, 10);
 
+    let shouldError = false;
     sequelize.query(`
     SELECT email, username FROM users
     WHERE lower(email) = ${email.toLowerCase()} OR lower(username) = ${username.toLowerCase()};`)
@@ -80,8 +81,10 @@ const register = (req, res) => {
     })
     .catch((error) => {
         console.log(error);
-        return res.sendStatus(500);
+        shouldError = true;
     });
+
+    if(shouldError) return res.sendStatus(500);
 
     sequelize.query(`
     INSERT INTO users(first_name, last_name, email, username, password, joined)
@@ -90,13 +93,25 @@ const register = (req, res) => {
     .then((dbRes) => {
         const censored = {...dbRes[0][0]};
         delete censored.password;
+        const newUser = jwt.sign(censored, secret);
         
-        return res.status(200).send(jwt.sign(censored, secret));
+        sequelize.query(`
+        INSERT INTO group_users (group_id, user_id, permission_level, joined)
+        VALUES(1, ${dbRes[0][0].user_id}, 1, NOW());`)
+        .then(() => {
+            return res.status(200).send(newUser);
+        })
+        .catch((error) => {
+            shouldError = true;
+        });
+
     })
     .catch((error) => {
         console.log(error);
         return res.sendStatus(500);
     });
+
+    if(shouldError) return res.sendStatus(500);
 };
 
 const changeUsername = (socket, username) => {
@@ -115,26 +130,50 @@ const changeUsername = (socket, username) => {
     return censored;
 };
 
-const fetchMessages = () => {
-    let result;
-
+const getConversations = (req, res) => {
     sequelize.query(`
-    SELECT * FROM messages;
-    ORDER BY message_id ASC;`)
+    SELECT g.group_id, g.name, u.user_id
+    FROM groups g, group_users u
+    WHERE g.group_id = u.group_id AND u.user_id = ${req.user.user_id};`)
     .then((dbRes) => {
-        result = dbRes[0];
+        const data = dbRes[0].map(row => {
+            return { group_id: row.group_id, group_name: row.name, user_id: row.user_id };
+        });
+        return res.status(200).send(data);
     })
     .catch((error) => {
-        return console.log(error);
+        console.log(error);
+        return res.sendStatus(500);
     });
+};
 
-    return result;
-}
+const getMessages = async (req, res) => {
+    const { id } = req.params;
+    if(!id) return res.status(400).send("Group ID missing!");
 
-const getMessages = (req, res) => {
+    let inGroup;
+    let shouldError = false;
+
+    await sequelize.query(`
+    SELECT * FROM group_users WHERE
+    group_id = ${id} AND user_id = ${req.user.user_id};
+    `).then((dbRes) => {
+        inGroup = dbRes[0].length > 0;
+    })
+    .catch((error) => {
+        console.log(error);
+        shouldError = true;
+    });
+    
+    if(shouldError) return res.sendStatus(500);
+    if(!inGroup) return res.status(403).send("You are not in this group!");
+
     sequelize.query(`
     SELECT * FROM messages
-    ORDER BY message_id ASC;`)
+    WHERE message_id IN(
+        SELECT message_id FROM group_messages
+        WHERE group_id = ${id}
+    );`)
     .then((dbRes) => {
         return res.status(200).send(dbRes[0]);
     })
@@ -160,13 +199,27 @@ const deleteMessage = async (socket, id) => {
     });
 };
 
+const checkAuth = (req, res) => {
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1];
+    if (token == null) return res.status(200).send(false);
+
+    jwt.verify(token, secret, (error, user) => {
+        if (error) return res.status(200).send(false);
+
+        res.status(200).send(!!user);
+    });
+}
+
 const authorizeUser = (req, res, next) => {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
     if (token == null) return res.status(401).send("No token provided!");
 
     jwt.verify(token, secret, (error, user) => {
-        if (error) return res.status(403).send("Unauthorized token provided!");
+        if(error) {
+            return res.status(403).send("Unauthorized token provided!");
+        }
         
         req.user = user;
         next();
@@ -192,7 +245,7 @@ const onConnection = (socket) => {
         socket.emit("auth-response", { error: null, user: censored});
     });
 
-    socket.on("message-request", (message) => {
+    socket.on("message-request", (groupId, message) => {
         const authResponse = authorizeSocket(socket.user.token);
         if(authResponse.error) return socket.emit("error", authResponse.error);
 
@@ -208,6 +261,14 @@ const onConnection = (socket) => {
         VALUES(${sequelize.escape(newMessage.username)}, ${newMessage.userId}, ${sequelize.escape(newMessage.text)}, NOW())
         RETURNING *;`)
         .then((dbRes) => {
+            sequelize.query(`
+            INSERT INTO group_messages (group_id, message_id)
+            VALUES(${groupId}, ${dbRes[0][0].message_id});`)
+            .catch((error) => {
+                console.log(error);
+                socket.emit("error", error);
+            });
+
             socket.broadcast.emit("message", { id: dbRes[0][0].message_id, ...newMessage });
         })
         .catch((error) => {
@@ -298,8 +359,10 @@ module.exports = {
     login,
     register,
     changeUsername,
+    getConversations,
     getMessages,
     deleteMessage,
+    checkAuth,
     authorizeUser,
     onConnection
 };

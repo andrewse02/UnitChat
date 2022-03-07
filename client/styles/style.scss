@@ -350,9 +350,6 @@ button {
     @extend .container-h;
     width: 75%;
     margin-bottom: 10px;
-    background-color: $highlight2;
-    border-radius: 1.5rem;
-    padding: 0.8rem;
 
     .message-user-info {
         .message-img {
@@ -361,33 +358,70 @@ button {
         }
     }
 
-    .message-content {
-        min-height: 50%;
-        margin-top: 30px;
-        flex: 1;
+    .message-bubble {
+        @extend .container-h;
+        background-color: $primary;
+        border-radius: 1rem;
+        padding: 0.5rem 0.8rem;
+        margin: 0 20px;
+        flex-grow: 1;
 
-        .message-text {
-            margin-right: 20px;
+        form {
+            flex-grow: 1;
+            input {
+                height: 24px;
+                width: 95%;
+                border: none;
+                border-radius: 6px;
+                padding: 5px;
+                margin: 0px 2.5px;
+
+                background-color: #565656;
+                color: #FFFFFF;
+                font-size: 0.8rem;
+            }
         }
-    }
 
-    .message-info {
-        min-width: 75px;
-        min-height: 50px;
+        .message-content {
+            min-height: 50%;
+            margin: 0 20px;
+            flex: 1;
 
-        .message-date {
-            white-space: nowrap;
+            .message-text {
+                word-break: break-all;
+                white-space: normal;
+            }
         }
 
-        .delete-message {
-            background: none;
-            color: $red;
-            min-width: 0;
-            height: 25px;
-            padding: 0;
-            margin-top: 5px;
+        .message-info {
+            min-width: 75px;
+            min-height: 50px;
 
-            font-size: 0.8rem;
+            .message-date {
+                white-space: nowrap;
+            }
+
+            .edit-message {
+                background: none;
+                color: $secondary;
+                min-width: 0;
+                height: 25px;
+                padding: 0;
+                margin-top: 5px;
+
+                font-size: 0.8rem;
+            }
+
+            .delete-message {
+                background: none;
+                color: $red;
+                min-width: 0;
+                height: 25px;
+                padding: 0;
+                margin-top: 5px;
+
+                font-size: 0.8rem;
+            }
         }
     }
 }
