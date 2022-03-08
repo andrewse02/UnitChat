@@ -86,32 +86,74 @@ const register = (req, res) => {
 
     if(shouldError) return res.sendStatus(500);
 
-    sequelize.query(`
-    INSERT INTO users(first_name, last_name, email, username, password, joined)
-    VALUES(${first}, ${last}, ${email}, ${username}, '${password}', NOW())
-    RETURNING *;`)
-    .then((dbRes) => {
-        const censored = {...dbRes[0][0]};
-        delete censored.password;
-        const newUser = jwt.sign(censored, secret);
-        
-        sequelize.query(`
+    sequelize
+        .query(
+            `
+    INSERT INTO users(first_name, last_name, email, username, password, profile_pic, joined)
+    VALUES(${first}, ${last}, ${email}, ${username}, '${password}', 'https://avatars.dicebear.com/api/initials/${username.replace(/\'/g, "")}.svg' , NOW())
+    RETURNING *;`
+        )
+        .then((dbRes) => {
+            const censored = { ...dbRes[0][0] };
+            delete censored.password;
+            const newUser = jwt.sign(censored, secret);
+
+            sequelize
+                .query(
+                    `
         INSERT INTO group_users (group_id, user_id, permission_level, joined)
-        VALUES(1, ${dbRes[0][0].user_id}, 1, NOW());`)
-        .then(() => {
-            return res.status(200).send(newUser);
+        VALUES(1, ${dbRes[0][0].user_id}, 1, NOW());`
+                )
+                .then(() => {
+                    return res.status(200).send(newUser);
+                })
+                .catch((error) => {
+                    shouldError = true;
+                });
         })
         .catch((error) => {
-            shouldError = true;
+            console.log(error);
+            return res.sendStatus(500);
         });
 
+    if(shouldError) return res.sendStatus(500);
+};
+
+const getUsers = async (req, res) => {
+    let { username } = req.query;
+    if(!username || username === "") return res.status(200).send([]);
+    
+    let result;
+
+    await sequelize.query(`
+    SELECT username, profile_pic FROM users
+    WHERE lower(username) LIKE ${sequelize.escape("%" + username.toLowerCase() + "%")};`)
+    .then((dbRes) => {
+        result = dbRes[0];
     })
     .catch((error) => {
-        console.log(error);
         return res.sendStatus(500);
     });
 
-    if(shouldError) return res.sendStatus(500);
+    if(result) res.status(200).send(result);
+};
+
+const getProfilePicture = async (req, res) => {
+    const { id } = req.params;
+    if(!id) return res.status(400).send("Missing user ID!");
+
+    let result;
+    await sequelize.query(`
+    SELECT profile_pic FROM users
+    WHERE user_id = ${id};`)
+    .then((dbRes) => {
+        result = dbRes[0][0].profile_pic;
+    })
+    .catch((error) => {
+        return res.sendStatus(500)
+    });
+
+    if(result) res.status(200).send(result);
 };
 
 const changeUsername = (socket, username) => {
@@ -132,19 +174,118 @@ const changeUsername = (socket, username) => {
 
 const getConversations = (req, res) => {
     sequelize.query(`
-    SELECT g.group_id, g.name, u.user_id
+    SELECT g.group_id, g.name, g.private, u.user_id
     FROM groups g, group_users u
     WHERE g.group_id = u.group_id AND u.user_id = ${req.user.user_id};`)
     .then((dbRes) => {
         const data = dbRes[0].map(row => {
-            return { group_id: row.group_id, group_name: row.name, user_id: row.user_id };
+            return { group_id: row.group_id, group_name: row.name, private: row.private, user_id: row.user_id };
         });
+        console.log(data);
         return res.status(200).send(data);
     })
     .catch((error) => {
         console.log(error);
         return res.sendStatus(500);
     });
+};
+
+const getConversationUsers = async (req, res) => {
+    const { id } = req.params;
+    if(!id) return res.status(400).send("Group ID missing!")
+    
+    let result;
+    let shouldError = false;
+
+    await sequelize.query(`
+    SELECT * FROM users
+    WHERE user_id IN(
+        SELECT user_id FROM group_users
+        WHERE group_id = ${id});`)
+    .then((dbRes) => {
+        result = dbRes[0];
+    })
+    .catch((error) => {
+        console.log(error);
+        shouldError = true;
+        return res.sendStatus(500);
+    });
+    if(shouldError) return;
+
+    res.status(200).send(result);
+};
+
+const createConversation = async (req, res) => {
+    let { username } = req.body;
+    let id;
+    let group_id;
+    if(!username) return res.status(400).send("Missing username!")
+    if(username.toLowerCase() === req.user.username.toLowerCase()) return res.status(400).send("You can't create a conversation with yourself!");
+
+    let result;
+    let shouldError = false;
+
+    await sequelize.query(`
+    SELECT username, user_id FROM users
+    WHERE lower(username) = ${sequelize.escape(username.toLowerCase())};`)
+    .then((dbRes) => {
+        if(dbRes[0].length < 1) {
+            shouldError = true;
+            return res.status(404).send("Could not find user!");
+        }
+
+        id = dbRes[0][0].user_id;
+        username = dbRes[0][0].username;
+    })
+    .catch((error) => {
+        console.log(error);
+        shouldError = true;
+        return res.sendStatus(500)
+    });
+    if(shouldError) return;
+
+    await sequelize.query(`
+    SELECT * FROM group_users
+    WHERE user_id in (${req.user.user_id}, ${id}) AND NOT group_id = 1`)
+    .then((dbRes) => {
+        if(dbRes[0].length <= 1) return
+        shouldError = true
+        return res.status(409).send("Group already exists!");
+    })
+    .catch((error) => {
+        console.log(error);
+        shouldError = true;
+        return res.sendStatus(500)
+    });
+    if(shouldError) return;
+    
+    await sequelize.query(`
+    INSERT INTO groups (name, private, created)
+    VALUES('${sequelize.escape(req.user.username).replace(/\'/g, "")},${sequelize.escape(username).replace(/\'/g, "")}', true, NOW())
+    RETURNING *;`)
+    .then((dbRes) => {
+        result = dbRes[0][0];
+        groupId = dbRes[0][0].group_id;
+    })
+    .catch((error) => {
+        console.log(error);
+        shouldError = true;
+        return res.sendStatus(500)
+    });
+    if(shouldError) return;
+
+    await sequelize.query(`
+    INSERT INTO group_users (group_id, user_id, permission_level, joined)
+        VALUES(${groupId}, ${req.user.user_id}, 1, NOW()),
+        (${groupId}, ${id}, 1, NOW());`)
+    .catch((error) => {
+        console.log(error);
+        shouldError = true;
+        return res.sendStatus(500);
+    });
+    if(shouldError) return;
+
+    return res.status(200).send(result);
 };
 
 const getMessages = async (req, res) => {
@@ -186,7 +327,7 @@ const getMessages = async (req, res) => {
 const deleteMessage = async (socket, id) => {
     if (!id) return socket.emit("error", "ID not input!");
 
-    sequelize.query(`
+    await sequelize.query(`
     DELETE FROM messages
     WHERE message_id = ${id} AND user_id = ${socket.user.user_id}
     RETURNING *;`)
@@ -251,14 +392,14 @@ const onConnection = (socket) => {
 
         const newMessage = {
             username: socket.user.username,
-            userId: socket.user.user_id,
+            user_id: socket.user.user_id,
             text: message,
             created: new Date(Date.now()).toString(),
         };
 
         sequelize.query(`
         INSERT INTO messages (username, user_id, text, created)
-        VALUES(${sequelize.escape(newMessage.username)}, ${newMessage.userId}, ${sequelize.escape(newMessage.text)}, NOW())
+        VALUES(${sequelize.escape(newMessage.username)}, ${newMessage.user_id}, ${sequelize.escape(newMessage.text)}, NOW())
         RETURNING *;`)
         .then((dbRes) => {
             sequelize.query(`
@@ -269,7 +410,7 @@ const onConnection = (socket) => {
                 socket.emit("error", error);
             });
 
-            socket.broadcast.emit("message", { id: dbRes[0][0].message_id, ...newMessage });
+            socket.broadcast.emit("message", { message_id: dbRes[0][0].message_id, ...newMessage });
         })
         .catch((error) => {
             console.log(error);
@@ -358,8 +499,12 @@ module.exports = {
     serveChat,
     login,
     register,
+    getUsers,
+    getProfilePicture,
     changeUsername,
     getConversations,
+    getConversationUsers,
+    createConversation,
     getMessages,
     deleteMessage,
     checkAuth,

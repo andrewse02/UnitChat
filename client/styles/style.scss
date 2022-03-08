@@ -35,18 +35,59 @@ $red: #FF1F1F;
     font-family: 'Roboto Condensed', sans-serif;
 }
 
-body {
-    background-color: $neutralDark;
+body, main, section {
+    background-color: $middleDark;
     margin: 0;
 }
 
-h1, h2, h3, h4, h5, h6, p {
+main {
+    &.container {
+        overflow: scroll;
+    }
+}
+
+h1, h2, h3, h4, h5, h6, p, label {
     margin: 2.5px;
     color: $neutralLight;
 
     a {
         cursor: pointer;
         color: $primary;
+    }
+}
+
+h1 {
+    font-size: 2.5rem;
+}
+
+h2 {
+    font-size: 2rem;
+}
+
+h3 {
+    font-size: 1.5rem;
+}
+
+h4 {
+    font-size: 1.25rem;
+}
+
+h5 {
+    font-size: 1rem;
+}
+
+h6 {
+    font-size: 0.8rem;
+}
+
+.title {
+    font-size: 5rem;
+}
+
+img {
+    &.logo {
+        height: 100px;
+        width: 100px;
     }
 }
 
@@ -71,7 +112,7 @@ a {
     }
 }
 
-div {
+div, main, section {
     &#overlay {
         display: none;
         position: absolute;
@@ -91,28 +132,38 @@ div {
     }
 }
 
+ul {
+    color: $neutralLight;
+}
+
+#header-container {
+    height: 400px;
+    width: 100vw;
+    padding-bottom: 100px;
+    // height: 0;
+    // width: 0;
+    // border-bottom: 400px solid $primary;
+    // border-left: 100vw solid red;
+}
+
 header {
     padding: 15px;
     color: $neutralLight;
+    width: 90vw;
 
     a {
         @extend a;
         color: $neutralLight;
     }
 
-    div.container-h {
+    nav.container-h {
         @extend .container-h;
         align-items: center;
     }
 
-    div.mid-links {
-        width: 50vw;
+    nav.mid-links {
         gap: 3rem;
     }
-}
-
-section {
-    margin: 10px 0px;
 }
 
 input {
@@ -263,6 +314,60 @@ button {
     justify-content: space-between;
 }
 
+#about {
+    margin-top: 20vh;
+    width: 50vw;
+
+    .container-h {
+        gap: 0 30px;
+    }
+}
+
+#features {
+    margin-top: 30vh;
+    width: 50vw;
+}
+
+.search-results {
+    @extend .container, .align-center;
+
+    display: none;
+
+    width: 210px;
+    max-height: 90px;
+    overflow: scroll;
+    padding: 10px;
+    background-color: #565656;
+    border-radius: 0.5rem;
+
+    button {
+        @extend .container-h, .center;
+
+        gap: 0 0.3rem;
+
+        background: none;
+        padding: 0;
+        min-width: 0;
+        margin: 0;
+
+        &:hover {
+            box-shadow: none;
+        }
+
+        img {
+            height: 25px;
+            width: 25px;
+            border-radius: 25%;
+        }
+
+        h5 {
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+    }
+}
+
 #conversations-section {
     width: 20vw;
     min-width: 250px;
@@ -305,7 +410,7 @@ button {
     position: fixed;
     top: 60px;
     display: none;
-    z-index: 1;
+    z-index: 10;
 }
 
 .error-message-container {
@@ -317,13 +422,46 @@ button {
     gap: 10px 0;
 }
 
+#conversation-modal {
+    gap: 20px 0;
+    min-height: 180px;
+    min-width: 400px;
+    padding: 20px;
+
+    .container {
+        width: 90%;
+        gap: 10px;
+
+        .container-h {
+            width: 100%;
+        }
+    }
+}
+
 #messages-container {
     height: 100%;
     overflow: scroll;
 }
 
 #conversations-section {
+    position: relative;
     overflow: scroll;
+}
+
+#new-conversation-container {
+    background-color: $primary;
+
+    width: 100%;
+    height: 60px;
+    position: absolute;
+    bottom: 0;
+
+    button {
+        background: none;
+        min-width: 0;
+        padding: 0;
+        color: $neutralLight;
+    }
 }
 
 .conversation {
@@ -355,6 +493,7 @@ button {
         .message-img {
             width: 40px;
             height: 40px;
+            border-radius: 25%;
         }
     }
 
@@ -362,12 +501,12 @@ button {
         @extend .container-h;
         background-color: $primary;
         border-radius: 1rem;
-        padding: 0.5rem 0.8rem;
+        padding: 0.5rem 0.25rem;
         margin: 0 20px;
-        flex-grow: 1;
+        width: 50%;
 
         form {
-            flex-grow: 1;
+            flex: 1;
             input {
                 height: 24px;
                 width: 95%;
@@ -394,12 +533,8 @@ button {
         }
 
         .message-info {
-            min-width: 75px;
+            min-width: 50px;
             min-height: 50px;
-
-            .message-date {
-                white-space: nowrap;
-            }
 
             .edit-message {
                 background: none;
@@ -422,6 +557,24 @@ button {
 
                 font-size: 0.8rem;
             }
+        }
+    }
+
+    .message-date {
+        white-space: nowrap;
+    }
+
+    &.outgoing {
+        .message-date {
+            margin-left: auto;
+        }
+
+        .message-bubble {
+            order: 1;
+        }
+
+        .message-user-info {
+            order: 2
         }
     }
 }

@@ -1,5 +1,11 @@
 const conversationsSection = document.getElementById("conversations-section");
+const newConversationButton = document.getElementById("new-conversation-button");
 let selectedConversation;
+
+const conversationModal = document.getElementById("conversation-modal");
+const usernameField = document.getElementById("username-field");
+const usernameResults = document.getElementById("username-results");
+const overlay = document.getElementById("overlay");
 
 const messagesSection = document.getElementById("messages-section");
 let messagesContainer = document.getElementById("messages-container");
@@ -20,10 +26,11 @@ const connect = async () => {
     socket.on("auth-response", async (res) => {
         socket.user = res.user;
         await populateConversaions(await getConversations());
+        await selectConversation(0);
     });
 
-    socket.on("message", (message) => {
-        messagesContainer.appendChild(getNewMessageElement(message));
+    socket.on("message", async (message) => {
+        messagesContainer.appendChild(await getNewMessageElement(message));
         messagesContainer.scroll(0, messagesContainer.scrollHeight);
     });
 
@@ -68,11 +75,11 @@ messageInputForm.addEventListener("submit", async (event) => {
 
     if(messageInput.value === "") return;
     
-    socket.emit("message-request", conversationsSection.children[selectedConversation-1].dataset.groupId, messageInput.value);
+    socket.emit("message-request", conversationsSection.querySelectorAll(".conversation")[selectedConversation].dataset.groupId, messageInput.value);
 
-    const messages = await getMessages(selectedConversation);
+    const messages = await getMessages(conversationsSection.querySelectorAll(".conversation")[selectedConversation].dataset.groupId);
 
-    messagesContainer.appendChild(getNewMessageElement({
+    messagesContainer.appendChild(await getNewMessageElement({
         message_id: messages[messages.length - 1].message_id,
         username: socket.user.username,
         user_id: socket.user.user_id,
@@ -87,29 +94,32 @@ messageInput.addEventListener("input", (event) => {
     //socket.emit("typing");
 });
 
-const getNewConversationElement = (conversation) => {
+const getNewConversationElement = async (conversation) => {
     const newConversation = document.createElement("div");
     newConversation.setAttribute("class", "conversation start align-center");
     newConversation.dataset.groupId = conversation.group_id;
 
     const conversationImg = document.createElement("img");
     conversationImg.setAttribute("class", "conversation-img");
-    conversationImg.setAttribute("src", "../img/UnitChat-logo.svg");
+    conversationImg.setAttribute("src", "/img/UnitChat-logo.svg");
+    if(conversation.private) conversationImg.setAttribute("src", await getUserProfilePicture(await (await getGroupUsers(conversation.group_id)).filter(user => +user.user_id !== +socket.user.user_id)[0].user_id));
 
     const conversationName = document.createElement("h4");
-    conversationName.textContent = conversation.group_name;
+    conversationName.textContent = conversation.group_name.replace(",", "").replace(socket.user.username, "");
 
     newConversation.appendChild(conversationImg);
     newConversation.appendChild(conversationName);
 
-    newConversation.addEventListener("click", (event) => {
-        selectConversation(Array.prototype.indexOf.call(event.target.parentNode.children, newConversation) + 1);
+    newConversation.addEventListener("click", async (event) => {
+        await selectConversation(Array.prototype.indexOf.call(event.target.parentNode.querySelectorAll(".conversation"), newConversation));
     });
 
     return newConversation;
 }
 
-const getNewMessageElement = (message) => {
+const getNewMessageElement = async (message) => {
+    const fromUser = +socket.user.user_id === +message.user_id;
+
     const newMessage = document.createElement("div");
     newMessage.setAttribute("class", "message start align-start");
     newMessage.dataset.messageId = message.message_id;
@@ -124,8 +134,7 @@ const getNewMessageElement = (message) => {
 
     const userImg = document.createElement("img");
     userImg.setAttribute("class", "message-img");
-    // Set to actual pfp
-    userImg.setAttribute("src", "../img/UnitChat-logo.svg");
+    await userImg.setAttribute("src", await getUserProfilePicture(message.user_id));
     userInfo.appendChild(userImg);
     newMessage.appendChild(userInfo);
 
@@ -141,14 +150,15 @@ const getNewMessageElement = (message) => {
     messageContent.appendChild(messageText);
 
     const messageInfo = document.createElement("div");
-    messageInfo.setAttribute("class", "message-info container align-end");
+    messageInfo.setAttribute("class", "message-info container center align-end");
 
     const date = document.createElement("p");
-    date.setAttribute("class", "message-date");
+    date.setAttribute("class", "message-date self-center");
     date.textContent = moment(new Date(message.created)).format("h:mm a")
-    messageInfo.appendChild(date);
 
-    if(+socket.user.user_id === +message.user_id) {
+    if(fromUser) {
+        newMessage.setAttribute("class", "message outgoing start align-start");
+
         const editButton = document.createElement("button");
         editButton.setAttribute("class", "edit-message");
         editButton.addEventListener("click", (event) => {
@@ -195,7 +205,7 @@ const getNewMessageElement = (message) => {
 
         const deleteIcon = document.createElement("span");
         deleteIcon.setAttribute("class", "material-icons");
-        deleteIcon.textContent = "delete"
+        deleteIcon.textContent = "delete";
 
         deleteButton.appendChild(deleteIcon);
 
@@ -216,6 +226,7 @@ const getNewMessageElement = (message) => {
     messageBubble.appendChild(messageInfo);
 
     newMessage.appendChild(messageBubble);
+    newMessage.appendChild(date);
 
     return newMessage;
 };
@@ -240,33 +251,47 @@ const getMessages = async (groupId) => {
     }
 };
 
-const populateConversaions = (conversations) => {
+const populateConversaions = async (conversations) => {
     const fragment = new DocumentFragment();
 
     for(let i = 0; i < conversations.length; i++) {
-        fragment.appendChild(getNewConversationElement(conversations[i]));
+        await fragment.appendChild(await getNewConversationElement(conversations[i]));
     }
 
     conversationsSection.appendChild(fragment);
-    selectConversation(1);
-    selectedConversation = 1;
 };
 
 const selectConversation = async (index) => {
     const conversations = conversationsSection.querySelectorAll(".conversation");
-    if(conversations[index-1].classList.contains("selected")) return;
+    if(conversations[index].classList.contains("selected")) return;
+    
     const selectedConversations = conversationsSection.querySelectorAll(".selected");
     for(let i = 0; i < selectedConversations.length; i++) {
         selectedConversations[i].classList.remove("selected");
     }
 
-    if(!conversations[index-1].classList.contains("selected")) conversations[index-1].classList.add("selected");
-    selectedConversation = conversations[index-1].dataset.groupId;
+    if(!conversations[index].classList.contains("selected")) conversations[index].classList.add("selected");
+    selectedConversation = index;
 
-    await populateMessages(await getMessages(conversations[index-1].dataset.groupId));
+    await populateMessages(await getMessages(conversations[index].dataset.groupId));
 };
 
-const populateMessages = (messages) => {
+const createConversation = async (username) => {
+    const body = { username };
+
+    axios
+        .post("/conversations", body, { headers: { Authorization: "Bearer " + localStorage.getItem("token") } })
+        .then(async (res) => {
+            await populateConversaions(await getConversations());
+            selectConversation(conversationsSection.querySelectorAll(".conversation").length - 1);
+        })
+        .catch((error) => {
+            if(error.response.status === 409) return alert("Group already exists!");
+            console.log(error.message);
+        });
+};
+
+const populateMessages = async (messages) => {
     if(messagesContainer.hasChildNodes()) {
         messagesContainer.remove();
         messagesContainer = document.createElement("div");
@@ -280,7 +305,7 @@ const populateMessages = (messages) => {
     const fragment = new DocumentFragment();
 
     for(let i = 0; i < messages.length; i++) {
-        fragment.appendChild(getNewMessageElement(messages[i]));
+        fragment.appendChild(await getNewMessageElement(messages[i]));
     }
 
     messagesContainer.appendChild(fragment);
@@ -304,11 +329,94 @@ const stopEditing = () => {
 
 const deleteMessage = (id) => {
     socket.emit("delete-request", id);
-}
+};
+
+
+const searchUsers = async(searchTerm) => {
+    const { data: response } = await axios.get("/users?username=" + searchTerm, {headers: { Authorization: "Bearer " + localStorage.getItem("token") }});
+    return response;
+};
+
+const getUserProfilePicture = async (id) => {
+    const {data: response} = await axios.get("/profile-picture/" + id, {headers: { Authorization: "Bearer " + localStorage.getItem("token") }});
+    return response;
+};
+
+const getGroupUsers = async (id) => {
+    const {data: response} = await axios.get("/conversations/" + id + "/users", {headers: { Authorization: "Bearer " + localStorage.getItem("token") }});
+    return response;
+};
 
 const logout = (event) => {
     localStorage.clear();
     location.reload();
+};
+
+newConversationButton.addEventListener("click", async (event) => {
+    conversationModal.style.display = "flex";
+    overlay.style.display = "block";
+    usernameField.focus();
+});
+
+overlay.addEventListener("click", (event) => {
+    hideModals();
+});
+
+usernameField.addEventListener("input", async (event) => {
+    const results = await searchUsers(usernameField.value);
+    if(results.length < 1) return;
+
+    while (usernameResults.hasChildNodes()) {
+        usernameResults.removeChild(usernameResults.firstChild);
+    }
+
+    usernameResults.style.display = "flex";
+
+    const fragment = new DocumentFragment();
+
+    for(let i = 0; i < results.length; i++) {
+        const resultButton = document.createElement("button");
+        resultButton.setAttribute("class", "search-result");
+
+        const resultPic = document.createElement("img");
+        resultPic.setAttribute("src", results[i].profile_pic);
+
+        const resultTitle = document.createElement("h5");
+        resultTitle.textContent = results[i].username;
+        
+        resultButton.appendChild(resultPic);
+        resultButton.appendChild(resultTitle);
+
+        resultButton.addEventListener("click", async (event) => {
+            usernameField.value = results[i].username;
+            usernameResults.style.display = "none";
+
+            while(usernameResults.hasChildNodes()) {
+                usernameResults.removeChild(usernameResults.firstChild);
+            }
+
+            createConversation(usernameField.value);
+            hideModals();
+        });
+        
+        fragment.appendChild(resultButton);
+    }
+
+    usernameResults.appendChild(fragment);
+});
+
+conversationModal.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    createConversation(usernameField.value);
+    hideModals();
+});
+
+const hideModals = () => {
+    conversationModal.style.display = "none";
+    overlay.style.display = "none";
+
+    usernameField.value = "";
 };
 
 document.addEventListener("keyup", (event) => {

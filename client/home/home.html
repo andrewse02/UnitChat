@@ -6,6 +6,7 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap" rel="stylesheet" />
 
+        <link rel="shortcut icon" href="/img/UnitChat-logo.svg" type="image/x-icon">
         <title>Unit Chat</title>
 
         <script src="/scripts/axios.min.js" defer></script>
@@ -13,24 +14,49 @@
         <script src="/home/home.js" defer></script>
     </head>
     <body>
-        <div class="container">
+        <main class="container align-center">
             <div id="overlay"></div>
 
-            <div class="container primary">
-                <header class="container-h center">
-                    <div class="container-h center">
-                        <a href="/"><h3>Unit Chat</h3></a>
-                    </div>
-                    <div class="container-h mid-links center">
+            <section id="header-container" class="container between align-center primary">
+                <header class="container-h between">
+                    <nav class="container-h mid-links center">
                         <a href="#about">About</a>
                         <a href="#features">Features</a>
                         <a href="#contact">Contact</a>
-                    </div>
+                    </nav>
                     <div class="container-h center">
                         <button id="start-chatting" class="neutral-light">Start Chatting</button>
                     </div>
                 </header>
-            </div>
+
+                <h1 class="title">Unit Chat</h1>
+            </section>
+
+            <section id="about" class="container center align-start">
+                <div class="container-h start">
+                    <h1>About</h1>
+                    <img class="logo" src="/img/UnitChat-logo.svg" alt="logo">
+                </div>
+                <br><br>
+
+                <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Possimus enim porro inventore repellendus suscipit perferendis ullam aliquid optio quam tempora, ea rerum ad placeat itaque corrupti distinctio consequuntur quasi hic ut. Officia officiis corporis laudantium molestiae unde explicabo maxime provident sint numquam adipisci aliquid, nobis impedit? Et amet officiis enim voluptate ab. Quaerat pariatur, consequatur animi iste cum doloribus, aliquid soluta iure culpa aut sint incidunt. Aspernatur repudiandae rem illum nihil ad quas eveniet accusantium delectus magnam, eius totam? Porro cumque assumenda libero mollitia nemo, quisquam blanditiis eius? Sequi quibusdam voluptatibus fugiat aspernatur, repellat distinctio. Quis, neque temporibus deserunt possimus praesentium ipsam tenetur laboriosam minima quod exercitationem voluptates libero maiores dolorem doloremque blanditiis repellendus vel architecto non dicta id harum. Facere amet natus quam totam libero nisi officia labore sint, voluptatem, molestiae quibusdam enim repellendus incidunt. Necessitatibus vero iure, saepe nihil animi odio neque cum magni placeat rem eius enim natus reprehenderit illo minima expedita id non dolorem quasi ab! Consequuntur, natus omnis aliquid nihil eius id quis qui facere tempore placeat dolor cumque quam, veniam voluptas! Vel, officia recusandae omnis eos, ullam reiciendis ea obcaecati quae laboriosam dolor voluptatem eum pariatur veritatis illum sequi voluptas, sit esse temporibus est.</p>
+                <br>
+                <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nihil quis quibusdam recusandae mollitia consequuntur vitae commodi repudiandae voluptatem perferendis voluptates facere ipsum accusantium, sunt iusto doloremque natus unde odio officiis adipisci impedit nisi ab? Sint nam est quis reiciendis nemo amet, quidem fugiat possimus? In accusamus cum ea placeat iste id labore similique, laborum corrupti harum temporibus ut assumenda autem nihil sequi nisi ipsam. Ipsam reiciendis a expedita omnis vel dolores eius reprehenderit aperiam quos repellendus facere ullam sequi odit error accusantium, consectetur corporis, dolorem fugiat tenetur explicabo ea ex architecto? Minus, ipsum! Non at quos atque, provident corrupti illo unde sapiente animi iste error quas. Magni optio praesentium molestias, vel culpa quisquam repudiandae dolores ad dolore inventore corporis, cumque quod, doloremque labore fugiat? Accusantium neque dolore libero veritatis quasi. Molestiae ipsam vitae, dicta magnam eos optio culpa vel saepe ullam. Ipsum id voluptatum quae quas architecto ad consequatur expedita.</p>
+            </section>
+
+            <section id="features" class="container center align-start">
+                <h1>Features</h1>
+                <br><br>
+
+                <ul>
+                    <li><h4>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Assumenda nulla non corporis nostrum soluta ipsam nobis, quod aliquid. Nesciunt, expedita dolorum odio harum est consequuntur dolorem voluptatem similique! Corporis, ipsam?</h4></li>
+                    <br>
+                    <li><h4>Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius, pariatur! Voluptatibus quo magnam blanditiis, error, explicabo maxime hic quasi voluptates, sunt est repellendus provident obcaecati ipsam atque? Officiis, quibusdam debitis.</h4></li>
+                    <br>
+                    <li><h4>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Tempore est, dolorum nam assumenda quaerat eveniet ea nesciunt perspiciatis consequatur reprehenderit, similique itaque illo in vel id dicta eum adipisci provident.</h4></li>
+                    <br>
+                </ul>
+            </section>
 
             <div class="container-h center">
                 <form id="register-form" class="modal container form">
@@ -49,7 +75,7 @@
                         <input id="register-email" type="text" placeholder="Email Address" autocomplete="email" />
                     </div>
                     <div class="error-message-container">
-                        <input id="register-username" type="text" placeholder="Username" autocomplete="username" />
+                        <input id="register-username" type="text" placeholder="Username" autocomplete="off" />
                     </div>
                     <div class="container-h form align-start">
                         <div class="error-message-container">
@@ -90,6 +116,6 @@
                     </div>
                 </form>
             </div>
-        </div>
+        </main>
     </body>
 </html>

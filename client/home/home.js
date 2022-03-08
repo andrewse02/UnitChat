@@ -61,7 +61,7 @@ const isLoggedIn = async () => {
     if(!localStorage.getItem("token")) return false;
     let loggedIn = false;
 
-    await axios.get("/auth", localStorage.getItem("token"))
+    await axios.get("/auth", {headers: { Authorization: "Bearer " + localStorage.getItem("token") }})
     .then((res) => {
         loggedIn = !!res.data;
     });
@@ -86,6 +86,10 @@ const hideForms = () => {
     registerForm.style.display = "none";
     loginForm.style.display = "none";
     overlay.style.display = "none";
+
+    inputs.forEach((input) => {
+        input.value = "";
+    });
 }
 
 startChatting.addEventListener("click", async (event) => {

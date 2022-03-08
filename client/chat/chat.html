@@ -3,6 +3,7 @@
     <head>
         <link rel="stylesheet" href="/styles/style.css" />
 
+        <link rel="shortcut icon" href="/img/UnitChat-logo.svg" type="image/x-icon">
         <title>Unit Chat</title>
 
         <script src="/scripts/axios.min.js" defer></script>
@@ -12,7 +13,13 @@
     </head>
     <body>
         <div class="container-h">
-            <div id="conversations-section" class="container align-center"></div>
+            <div id="overlay"></div>
+            <div id="conversations-section" class="container align-center">
+                <div id="new-conversation-container" class="container-h around">
+                    <h4>New Conversation</h4>
+                    <button id="new-conversation-button"><span class="material-icons">person_add</span></button>
+                </div>
+            </div>
             <div id="messages-section" class="container end">
                 <div id="messages-container" class="container start align-center"></div>
                 <div class="container">
@@ -21,6 +28,24 @@
                     </form>
                 </div>
             </div>
+
+        </div>
+        <div class="container-h center">
+            <form id="conversation-modal" class="modal container center align-center">
+                    <div class="container-h start">
+                        <h2>New Conversation</h2>
+                    </div>
+                    <div class="container align-center">
+                        <label for="username-field">Who would you like to message?</label>
+                        <div class="container-h around">
+                            <input id="username-field" type="text" placeholder="Username" autocomplete="off" />
+                            <button class="primary">Create</button>
+                        </div>
+                        <div id="username-results" class="search-results">
+                            <button type="button" class="search-result"><h5>Result lol</h5></button>
+                        </div>
+                    </div>
+            </form>
         </div>
     </body>
 </html>

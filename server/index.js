@@ -23,9 +23,14 @@ app.post("/login", controller.login);
 
 app.post("/register", controller.register);
 
+app.get("/users", controller.authorizeUser, controller.getUsers);
 app.put("/users", controller.authorizeUser, controller.changeUsername);
 
+app.get("/profile-picture/:id", controller.authorizeUser, controller.getProfilePicture);
+
 app.get("/conversations", controller.authorizeUser, controller.getConversations);
+app.get("/conversations/:id/users", controller.authorizeUser, controller.getConversationUsers)
+app.post("/conversations", controller.authorizeUser, controller.createConversation);
 
 app.get("/messages/:id", controller.authorizeUser, controller.getMessages);
 
