@@ -10,9 +10,23 @@ const overlay = document.getElementById("overlay");
 const messagesSection = document.getElementById("messages-section");
 let messagesContainer = document.getElementById("messages-container");
 const messageInputForm = document.getElementById("message-input-container");
+const typingIcon = document.getElementById("typing-icon");
+const typingText = document.getElementById("typing-text");
 const messageInput = document.getElementById("message-input");
 
 let socket;
+
+const profilePictures = [];
+
+const messageValidator = new UnderageValidate({
+        errorMessageClass: "error",
+        errorMessageContainerClass: "error-message-container",
+        errorFieldClass: "error"
+    })
+    .addField(messageInput.id, {
+        max: 1000,
+        message: "1000 character limit!"
+    });
 
 const connect = async () => {
     socket = io();
@@ -22,32 +36,42 @@ const connect = async () => {
         alert(error);
     });
     
-    socket.emit("auth-request", localStorage.getItem("token"));
-    socket.on("auth-response", async (res) => {
+    socket.emit("auth", localStorage.getItem("token"));
+    socket.on("auth", async (res) => {
         socket.user = res.user;
         await populateConversaions(await getConversations());
         await selectConversation(0);
     });
 
     socket.on("message", async (message) => {
-        messagesContainer.appendChild(await getNewMessageElement(message));
+
+        const newMessage = await getNewMessageElement(message);
+        newMessage.style = "animation: message 850ms ease-in;";
+
+        messagesContainer.appendChild(newMessage);
         messagesContainer.scroll(0, messagesContainer.scrollHeight);
+    });
+
+    socket.on("edit", async (message) => {
+        const found = Array.from(messagesContainer.children).find((child) => +child.dataset.messageId === +message.message_id)
+        if(found) found.querySelector(".message-text").textContent = message.text;
     });
 
     socket.on("delete", (message) => {
         const found = Array.from(messagesContainer.children).find((child) => +child.dataset.messageId === +message.message_id);
-
         if(found) messagesContainer.removeChild(found);
     });
 
     socket.on("typing", (typing) => {
-        typingFiltered = typing.filter((username) => username !== socket.user.username);
-        typingText.textContent = typingFiltered.length > 0 ? typingFiltered.reduce((text, value, i) => text + (i < typing.length - 1 ? ", " : ", and ") + value) + " is typing..." : "";
-    });
+        typingFiltered = [...new Set([...typing].filter((element) => element.user.username !== socket.user.username && +conversationsSection.querySelectorAll(".conversation")[selectedConversation].dataset.groupId === +element.group).map((element) => element.user.username))];
 
-    socket.on("change-response", (user) => {
-        socket.user = user;
-        changeInput.value = "";
+        if(typingFiltered.length < 1) {
+            typingIcon.style.display = "none";
+            return typingText.textContent = "";
+        }
+
+        typingText.textContent = typingFiltered.reduce((text, value, i) => text + (i < typing.length - 1 ? ", " : ", and ") + value) + " is typing...";
+        typingIcon.style.display = "block";
     });
 }
 
@@ -74,24 +98,28 @@ messageInputForm.addEventListener("submit", async (event) => {
     messageInput.value = messageInput.value.trim();
 
     if(messageInput.value === "") return;
+    if(!messageValidator.validate()) return;
     
-    socket.emit("message-request", conversationsSection.querySelectorAll(".conversation")[selectedConversation].dataset.groupId, messageInput.value);
+    socket.emit("message", conversationsSection.querySelectorAll(".conversation")[selectedConversation].dataset.groupId, messageInput.value);
 
     const messages = await getMessages(conversationsSection.querySelectorAll(".conversation")[selectedConversation].dataset.groupId);
-
-    messagesContainer.appendChild(await getNewMessageElement({
+    const newMessage = await getNewMessageElement({
         message_id: messages[messages.length - 1].message_id,
         username: socket.user.username,
         user_id: socket.user.user_id,
         text: messageInput.value,
         created: new Date(Date.now())
-    }));
+    });
+    newMessage.style = "animation: message-outgoing 850ms ease-in;";
+
+    messagesContainer.appendChild(newMessage);
     
     messageInput.value = "";
 });
 
 messageInput.addEventListener("input", (event) => {
-    //socket.emit("typing");
+    messageValidator.validate();
+    socket.emit("typing", +conversationsSection.querySelectorAll(".conversation")[selectedConversation].dataset.groupId);
 });
 
 const getNewConversationElement = async (conversation) => {
@@ -258,7 +286,13 @@ const populateConversaions = async (conversations) => {
         await fragment.appendChild(await getNewConversationElement(conversations[i]));
     }
 
+    const currentConversations = conversationsSection.querySelectorAll(".conversation");
+    for(let i = 0; i < currentConversations.length; i++) {
+        currentConversations[i].remove();
+    }
+
     conversationsSection.appendChild(fragment);
+    selectedConversation = 0;
 };
 
 const selectConversation = async (index) => {
@@ -328,7 +362,7 @@ const stopEditing = () => {
 }
 
 const deleteMessage = (id) => {
-    socket.emit("delete-request", id);
+    socket.emit("delete", id);
 };
 
 
@@ -338,7 +372,10 @@ const searchUsers = async(searchTerm) => {
 };
 
 const getUserProfilePicture = async (id) => {
+    if(profilePictures[id]) return profilePictures[id];
+
     const {data: response} = await axios.get("/profile-picture/" + id, {headers: { Authorization: "Bearer " + localStorage.getItem("token") }});
+    profilePictures[id] = response;
     return response;
 };
 
@@ -423,7 +460,23 @@ document.addEventListener("keyup", (event) => {
     if(event.key === "Escape") stopEditing();
 });
 
+const checkTheme = async () => {
+    if (localStorage.getItem("token")) {
+        await axios.get("/user", { headers: { Authorization: "Bearer " + localStorage.getItem("token") } })
+            .then((res) => {
+                if (res.data.username.toLowerCase().includes("joely") || res.data.username.toLowerCase().includes("vernier")) {
+                    document.documentElement.style.setProperty("--color-primary", "#FF1F1F");
+                    document.documentElement.style.setProperty("--color-highlight1", "#830000");
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+}
+
 window.onload = async () => {
     if(await isLoggedIn()) await connect();
     messagesContainer.scroll(0, messagesContainer.scrollHeight);
+    checkTheme();
 };

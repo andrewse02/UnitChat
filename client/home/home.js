@@ -1,5 +1,3 @@
-const htmlBody = document.body;
-
 const startChatting = document.getElementById("start-chatting");
 const overlay = document.getElementById("overlay");
 
@@ -15,9 +13,28 @@ const registerUsername = document.getElementById("register-username");
 const registerPassword = document.getElementById("register-password");
 const registerConfirmPassword = document.getElementById("register-confirm-password");
 
-const inputs = [registerFirst, registerLast, registerEmail, registerUsername, registerPassword, registerConfirmPassword];
+const loginInputs = [loginUsername, loginPassword];
+const registerInputs = [registerFirst, registerLast, registerEmail, registerUsername, registerPassword, registerConfirmPassword];
 
-const validator = new UnderageValidate({
+AOS.init({
+    duration: 1500
+});
+
+const loginValidator = new UnderageValidate({
+        errorMessageClass: "error",
+        errorMessageContainerClass: "error-message-container",
+        errorFieldClass: "error"
+    })
+    .addField(loginUsername.id, {
+        required: true,
+        message: "This field is required!"
+    })
+    .addField(loginPassword.id, {
+        required: true,
+        message: "This field is required!"
+    });
+
+const registerValidator = new UnderageValidate({
         errorMessageClass: "error",
         errorMessageContainerClass: "error-message-container",
         errorFieldClass: "error"
@@ -87,7 +104,11 @@ const hideForms = () => {
     loginForm.style.display = "none";
     overlay.style.display = "none";
 
-    inputs.forEach((input) => {
+    loginInputs.forEach((input) => {
+        input.value = "";
+    });
+
+    registerInputs.forEach((input) => {
         input.value = "";
     });
 }
@@ -101,8 +122,8 @@ overlay.addEventListener("click", (event) => {
     hideForms();
 });
 
-inputs.forEach(input => {
-    input.addEventListener("input", () => validator.validateField(input.id));
+registerInputs.forEach(input => {
+    input.addEventListener("input", () => registerValidator.validateField(input.id));
 });
 
 registerForm.addEventListener("submit", async (event) => {
@@ -116,7 +137,7 @@ loginForm.addEventListener("submit", async (event) => {
 const register = (event) => {
     event.preventDefault();
     
-    if(!validator.validate()) return;
+    if(!registerValidator.validate()) return;
     
     const body = {
         first: registerFirst.value,
@@ -132,6 +153,11 @@ const register = (event) => {
             login(res.data);
         })
         .catch((error) => {
+            if(error.response.status === 409) {
+                if(error.response.message.includes("Email")) return registerValidator.invalidateField(registerEmail.id, "Email already in use!");
+                if(error.response.message.includes("Username")) return registerValidator.invalidateField(registerUsername.id, "Username already in use!");
+            }
+
             console.log(error);
             alert(error.response.data);
         });
@@ -139,6 +165,8 @@ const register = (event) => {
 
 const loginEvent = (event) => {
     event.preventDefault();
+
+    if(!loginValidator.validate()) return;
     
     const body = {
         username: loginUsername.value,
@@ -151,6 +179,18 @@ const loginEvent = (event) => {
             login(res.data);
         })
         .catch((error) => {
+            if(error.response.status === 400) {
+                if(error.response.message.includes("Missing")) {
+                    registerValidator.invalidateField(loginUsername.id, "Missing some fields!");
+                    return registerValidator.invalidateField(loginPassword.id, "Missing some fields!");
+                }
+            }
+
+            if(error.response.status === 401) {
+                registerValidator.invalidateField(loginUsername.id, "Username or password is incorrect!");
+                return registerValidator.invalidateField(loginPassword.id, "Username or password is incorrect!");
+            }
+
             console.log(error);
             alert(error.response.data);
         });
@@ -160,3 +200,20 @@ const login = (token) => {
     localStorage.setItem("token", token);
     window.location.replace("/chat");
 }
+
+const checkTheme = async () => {
+    if (localStorage.getItem("token")) {
+        await axios.get("/user", { headers: { Authorization: "Bearer " + localStorage.getItem("token") } })
+            .then((res) => {
+                if (res.data.username.toLowerCase().includes("joely") || res.data.username.toLowerCase().includes("vernier")) {
+                    document.documentElement.style.setProperty("--color-primary", "#FF1F1F");
+                    document.documentElement.style.setProperty("--color-highlight1", "#830000");
+                }
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+}
+
+window.onload = checkTheme;

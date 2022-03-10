@@ -19,8 +19,6 @@ let io;
 
 const port = process.env.PORT || 4000;
 
-const users = [];
-const messages = [];
 let typing = [];
 
 const serveHome = (req, res) => {
@@ -76,7 +74,7 @@ const register = (req, res) => {
     SELECT email, username FROM users
     WHERE lower(email) = ${email.toLowerCase()} OR lower(username) = ${username.toLowerCase()};`)
     .then((dbRes) => {
-        if(dbRes[0][0] && dbRes[0][0].email) return res.status(409).send("Email already in use!");
+        if(dbRes[0][0] && dbRes[0][0].email) return res.status(409).send("Email already taken!");
         if(dbRes[0][0] && dbRes[0][0].username) return res.status(409).send("Username already taken!");
     })
     .catch((error) => {
@@ -119,6 +117,11 @@ const register = (req, res) => {
     if(shouldError) return res.sendStatus(500);
 };
 
+const getUser = async (req, res) => {
+    const {password, token, ...censored} = req.user;
+    res.status(200).send(censored);
+};
+
 const getUsers = async (req, res) => {
     let { username } = req.query;
     if(!username || username === "") return res.status(200).send([]);
@@ -154,22 +157,6 @@ const getProfilePicture = async (req, res) => {
     });
 
     if(result) res.status(200).send(result);
-};
-
-const changeUsername = (socket, username) => {
-    if(!username) return { error: "No username input!" };
-
-    const foundIndex = users.findIndex((user) => +user.id === +socket.user.user_id);
-
-    if(!users[foundIndex]) return { error: "User not found!" };
-    
-    users[foundIndex].username = username;
-    const newToken = jwt.sign(users[foundIndex], secret);
-    users[foundIndex].token = newToken;
-    socket.user = users[foundIndex];
-
-    const { token, password, ...censored } = socket.user;
-    return censored;
 };
 
 const getConversations = (req, res) => {
@@ -324,6 +311,25 @@ const getMessages = async (req, res) => {
     });
 };
 
+const editMessage = async (socket, message) => {
+    if (!message.message_id) return socket.emit("error", "ID not input!");
+    if (!message.text) return socket.emit("error", "Text not input!");
+
+    await sequelize.query(`
+    UPDATE messages
+    SET text = ${sequelize.escape(message.text)}
+    WHERE message_id = ${message.message_id} AND user_id = ${socket.user.user_id}
+    RETURNING *;`)
+    .then((dbRes) => {
+        if(!dbRes[0][0]) return socket.emit("error", "You did not send this message!");
+        io.emit("edit", dbRes[0][0]);
+    })
+    .catch((error) => {
+        console.log(error);
+        socket.emit("error", error);
+    });
+};
+
 const deleteMessage = async (socket, id) => {
     if (!id) return socket.emit("error", "ID not input!");
 
@@ -332,6 +338,7 @@ const deleteMessage = async (socket, id) => {
     WHERE message_id = ${id} AND user_id = ${socket.user.user_id}
     RETURNING *;`)
     .then((dbRes) => {
+        if(!dbRes[0][0]) return socket.emit("error", "You did not send this message!");
         io.emit("delete", dbRes[0][0]);
     })
     .catch((error) => {
@@ -372,7 +379,7 @@ const onConnection = (socket) => {
 
     console.log("A client has connected.");
     
-    socket.on("auth-request", async (recievedToken) => {
+    socket.on("auth", async (recievedToken) => {
         const authResponse = authorizeSocket(recievedToken);
         if (authResponse.error) {
             socket.emit("error", authResponse.error);
@@ -383,10 +390,10 @@ const onConnection = (socket) => {
 
         socket.user = authResponse.user;
         const { token, password, ...censored } = authResponse.user;
-        socket.emit("auth-response", { error: null, user: censored});
+        socket.emit("auth", { error: null, user: censored});
     });
 
-    socket.on("message-request", (groupId, message) => {
+    socket.on("message", (groupId, message) => {
         const authResponse = authorizeSocket(socket.user.token);
         if(authResponse.error) return socket.emit("error", authResponse.error);
 
@@ -418,7 +425,15 @@ const onConnection = (socket) => {
         });
     });
 
-    socket.on("delete-request", async (id) => {
+    socket.on("edit", async (message) => {
+        const authResponse = authorizeSocket(socket.user.token);
+        if(authResponse.error) return socket.emit("error", authResponse.error);
+
+        await editMessage(socket, message);
+        socket.broadcast.emit("edit", id);
+    });
+
+    socket.on("delete", async (id) => {
         const authResponse = authorizeSocket(socket.user.token);
         if(authResponse.error) return socket.emit("error", authResponse.error);
 
@@ -426,47 +441,37 @@ const onConnection = (socket) => {
         socket.broadcast.emit("delete", id);
     });
 
-    socket.on("typing", () => {
+    socket.on("typing", async (groupId) => {
         const authResponse = authorizeSocket(socket.user.token);
         if(authResponse.error) return socket.emit("error", authResponse.error);
         
-        const typingEntry = { user: authResponse.user };
+        const typingEntry = { data: {user: authResponse.user, group: +groupId} };
         
-        let foundIndex = typing.findIndex((element) => +element.user.id === +authResponse.user.id);
+        let foundIndex = typing.findIndex((element) => +element.data.user.id === +authResponse.user.id);
 
         if (!typing[foundIndex]) {
             typingEntry.timeout = setTimeout(() => {
-                typing = typing.filter((element) => element.user.id !== authResponse.user.id);
-                const usernames = typing.map((object) => object.user.username);
+                typing = typing.filter((element) => element.data.user.id !== authResponse.user.id);
+                const result = typing.map((object) => object.data);
 
-                io.emit("typing", usernames);
-            }, 3000);
+                io.emit("typing", result);
+            }, 5000);
             typing.push(typingEntry);
-            const usernames = typing.map((object) => object.user.username);
-            return io.emit("typing", usernames);
+            const result = typing.map((object) => object.data);
+            return io.emit("typing", result);
         }
 
-        let usernames = typing.map((object) => object.user.username);
+        let result = typing.map((object) => object.data);
         clearTimeout(typing[foundIndex].timeout);
         typingEntry.timeout = setTimeout(() => {
             typing = typing.filter((element) => element.user.id !== authResponse.user.id);
-            usernames = typing.map((object) => object.user.username);
+            result = typing.map((object) => object.data);
             
-            io.emit("typing", usernames);
-        }, 3000);
+            io.emit("typing", result);
+        }, 5000);
         
-        foundIndex = typing.findIndex((element) => +element.user.id === +authResponse.user.id);
+        foundIndex = typing.findIndex((element) => +element.data.user.id === +authResponse.user.id);
         typing[foundIndex] = typingEntry;
-    });
-
-    socket.on("change-request", (username) => {
-        const authResponse = authorizeSocket(socket.user.token);
-        if(authResponse.error) return socket.emit("error", authResponse.error);
-
-        const changeResponse = changeUsername(socket, username);
-
-        if(changeResponse.error) return socket.emit("error", changeResponse.error);
-        return socket.emit("change-response", changeResponse);
     });
 };
 
@@ -499,13 +504,14 @@ module.exports = {
     serveChat,
     login,
     register,
+    getUser,
     getUsers,
     getProfilePicture,
-    changeUsername,
     getConversations,
     getConversationUsers,
     createConversation,
     getMessages,
+    editMessage,
     deleteMessage,
     checkAuth,
     authorizeUser,

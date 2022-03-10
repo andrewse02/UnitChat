@@ -9,6 +9,7 @@
         <script src="/scripts/axios.min.js" defer></script>
         <script src="/socket.io/socket.io.js" defer></script>
         <script src="/scripts/moment.js" defer></script>
+        <script src="/scripts/underage-validate.min.js" defer></script>
         <script src="/chat/chat.js" defer></script>
     </head>
     <body>
@@ -24,7 +25,20 @@
                 <div id="messages-container" class="container start align-center"></div>
                 <div class="container">
                     <form id="message-input-container" class="container start align-center">
-                        <input id="message-input" type="text" placeholder="Message" autocomplete="off" />
+                        <div class="container">
+                            <div class="container-h align-end">
+                                <div id="typing-icon">
+                                    <span>&bull;</span>
+                                    <span>&bull;</span>
+                                    <span>&bull;</span>
+                                </div>
+                                <p id="typing-text"></p>
+                            </div>
+
+                            <div class="error-message-container">
+                                <input id="message-input" type="text" placeholder="Message" autocomplete="off" />
+                            </div>
+                        </div>
                     </form>
                 </div>
             </div>

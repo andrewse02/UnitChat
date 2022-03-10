@@ -23,8 +23,8 @@ app.post("/login", controller.login);
 
 app.post("/register", controller.register);
 
+app.get("/user", controller.authorizeUser, controller.getUser);
 app.get("/users", controller.authorizeUser, controller.getUsers);
-app.put("/users", controller.authorizeUser, controller.changeUsername);
 
 app.get("/profile-picture/:id", controller.authorizeUser, controller.getProfilePicture);
 

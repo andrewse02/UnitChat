@@ -1,13 +1,23 @@
-$primary: #0AADFF;
-$secondary: #494949;
-$highlight1: #002B6C;
-$highlight2: #4654EE;
-$neutralDark: #1C1D21;
-$middleDark: #333333;
-$lightDark: #AAAAAA;
-$neutralLight: #FFFFFF;
-$green: #1CD822;
-$red: #FF1F1F;
+$colors: (
+    primary: #0AADFF,
+    // primary: #FF1F1F,
+    secondary: #494949,
+    highlight1: #002B6C,
+    // highlight1: #830000,
+    highlight2: #4654EE,
+    neutralDark: #1C1D21,
+    middleDark: #333333,
+    lightDark: #AAAAAA,
+    neutralLight: #FFFFFF,
+    green: #1CD822,
+    red: #FF1F1F
+);
+
+:root {
+    @each $color, $value in $colors {
+        --color-#{$color}: #{$value};
+    }
+}
 
 @font-face {
   font-family: 'Material Icons';
@@ -33,10 +43,11 @@ $red: #FF1F1F;
 
 * {
     font-family: 'Roboto Condensed', sans-serif;
+    scroll-behavior: smooth;
 }
 
 body, main, section {
-    background-color: $middleDark;
+    background-color: var(--color-middleDark);
     margin: 0;
 }
 
@@ -48,11 +59,11 @@ main {
 
 h1, h2, h3, h4, h5, h6, p, label {
     margin: 2.5px;
-    color: $neutralLight;
+    color: var(--color-neutralLight);
 
     a {
         cursor: pointer;
-        color: $primary;
+        color: var(--color-primary);
     }
 }
 
@@ -95,7 +106,7 @@ p {
     font-size: 0.8rem;
 
     &.error {
-        color: $red;
+        color: var(--color-red);
     }
 }
 
@@ -115,25 +126,25 @@ a {
 div, main, section {
     &#overlay {
         display: none;
-        position: absolute;
+        position: fixed;
         height: 100vh;
         width: 100vw;
         background-color: rgba($color: #000000, $alpha: 0.5);
     }
 
     &.highlight1 {
-        color: $neutralLight;
-        background-color: $highlight1;
+        color: var(--color-neutralLight);
+        background-color: var(--color-highlight1);
     }
 
     &.primary {
-        color: $neutralLight;
-        background-color: $primary;
+        color: var(--color-neutralLight);
+        background-color: var(--color-primary);
     }
 }
 
 ul {
-    color: $neutralLight;
+    color: var(--color-neutralLight);
 }
 
 #header-container {
@@ -148,12 +159,12 @@ ul {
 
 header {
     padding: 15px;
-    color: $neutralLight;
+    color: var(--color-neutralLight);
     width: 90vw;
 
     a {
         @extend a;
-        color: $neutralLight;
+        color: var(--color-neutralLight);
     }
 
     nav.container-h {
@@ -175,25 +186,25 @@ input {
     margin: 0px 2.5px;
 
     background-color: #565656;
-    color: #FFFFFF;
+    color: var(--color-neutralLight);
     font-size: 1rem;
 
     &:focus {
         @extend input;
-        outline: 1px solid #0AADFF;
+        outline: 1px solid var(--color-primary);
     }
 
     &.error {
-        outline: 1px solid $red;
+        outline: 1px solid var(--color-red);
     }
 
     &.success {
-        outline: 1px solid $green;
+        outline: 1px solid var(--color-green);
     }
 }
 
 ::placeholder {
-    color: #FFFFFF;
+    color: var(--color-neutralLight);
     opacity: 0.25;
 }
 
@@ -207,35 +218,35 @@ button {
     border-radius: 10px;
     border: none;
 
-    color: $middleDark;
+    color: var(--color-middleDark);
 
     &.primary {
         @extend button;
-        background-color: $primary;
+        background-color: var(--color-primary);
     }
 
     &.neutral-light {
         @extend button;
-        background-color: $neutralLight;
-        color: $primary;
+        background-color: var(--color-neutralLight);
+        color: var(--color-primary);
     }
 
     &.danger {
         @extend button;
-        background-color: $red;
+        background-color: var(--color-red);
     }
 
     &:disabled {
         @extend button;
-        background-color: $middleDark;
-        color: $neutralLight;
+        background-color: var(--color-middleDark);
+        color: var(--color-neutralLight);
         opacity: 0.75;
     }
 
     &:hover {
         @extend button;
         cursor: pointer;
-        box-shadow: 0 8px 8px rgba($color: $neutralDark, $alpha: 0.2);
+        box-shadow: 0 8px 8px rgba($color: var(--color-neutralDark), $alpha: 0.2);
     }
     
     &.close {
@@ -250,7 +261,7 @@ button {
         text-align: center;
 
         background: none;
-        color: $neutralDark;
+        color: var(--color-neutralDark);
         font-size: 1.25rem;
 
         &:hover {
@@ -315,7 +326,7 @@ button {
 }
 
 #about {
-    margin-top: 20vh;
+    margin-top: 30vh;
     width: 50vw;
 
     .container-h {
@@ -372,7 +383,7 @@ button {
     width: 20vw;
     min-width: 250px;
     height: 100vh;
-    background-color: $secondary;
+    background-color: var(--color-secondary);
 
     &.conversation {
         padding: 15px 25px;
@@ -382,28 +393,62 @@ button {
 #messages-section {
     width: 80vw;
     height: 100vh;
-    background-color: $middleDark;
+    background-color: var(--color-middleDark);
+}
+
+#message-input-container {
+    width: 100%;
+    margin: 0 auto;
+    // padding-bottom: 15px;
+    position: relative;
+    z-index: 1;
+    background-color: var(--color-middleDark);
 
     .container {
-        #message-input-container {
-            width: 100%;
-            margin: 0 auto;
-            padding-bottom: 15px;
-            position: relative;
-            z-index: 1;
-            background-color: $middleDark;
+        width: 80%;
 
-            #message-input {
-                width: 80%;
-                padding: 10px 15px;
-                align-self: center;
+        .error-message-container {
+            min-height: 64px;
+        }
+
+        #typing-icon {
+            display: none;
+            height: 22.5px;
+            margin-right: 2.5px;
+            
+            span {
+                display: inline-block;
+                font-size: 1.5rem;
+                letter-spacing: 0;
+                color: var(--color-neutralLight);
+
+                animation: typing 0.4s linear infinite forwards alternate;
+                
+                &:nth-child(1) {
+                    animation-delay: 0.1s;
+                }
+
+                &:nth-child(2) {
+                    animation-delay: 0.2s;
+                }
+
+                &:nth-child(3) {
+                    animation-delay: 0.3s;
+                }
+
             }
+        }
+
+        #message-input {
+            width: 100%;
+            padding: 10px 15px;
+            align-self: center;
         }
     }
 }
 
 .modal {
-    background-color: $middleDark;
+    background-color: var(--color-middleDark);
     border-radius: 10px;
     padding: 35px;
 
@@ -449,7 +494,7 @@ button {
 }
 
 #new-conversation-container {
-    background-color: $primary;
+    background-color: var(--color-primary);
 
     width: 100%;
     height: 60px;
@@ -460,7 +505,7 @@ button {
         background: none;
         min-width: 0;
         padding: 0;
-        color: $neutralLight;
+        color: var(--color-neutralLight);
     }
 }
 
@@ -474,7 +519,7 @@ button {
     }
     
     &.selected, &:hover {
-        outline: 2px solid $primary;
+        outline: 2px solid var(--color-primary);
     }
 
     .conversation-img {
@@ -499,7 +544,7 @@ button {
 
     .message-bubble {
         @extend .container-h;
-        background-color: $primary;
+        background-color: var(--color-primary);
         border-radius: 1rem;
         padding: 0.5rem 0.25rem;
         margin: 0 20px;
@@ -516,7 +561,7 @@ button {
                 margin: 0px 2.5px;
 
                 background-color: #565656;
-                color: #FFFFFF;
+                color: var(--color-neutralLight);
                 font-size: 0.8rem;
             }
         }
@@ -538,7 +583,7 @@ button {
 
             .edit-message {
                 background: none;
-                color: $secondary;
+                color: var(--color-secondary);
                 min-width: 0;
                 height: 25px;
                 padding: 0;
@@ -549,7 +594,7 @@ button {
 
             .delete-message {
                 background: none;
-                color: $red;
+                color: var(--color-red);
                 min-width: 0;
                 height: 25px;
                 padding: 0;
@@ -565,6 +610,8 @@ button {
     }
 
     &.outgoing {
+        animation-name: message-outgoing;
+
         .message-date {
             margin-left: auto;
         }
@@ -579,8 +626,37 @@ button {
     }
 }
 
-#typing {
-    margin: 14px;
-    margin-top: 5px;
-    font-size: 0.8rem;
+@keyframes typing {
+    to {
+        color: var(--color-secondary);
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes message {
+    0% {
+        transform: translateX(-150%);
+    }
+
+    80% {
+        transform: translateX(10%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes message-outgoing {
+    0% {
+        transform: translateX(150%);
+    }
+
+    80% {
+        transform: translateX(-10%);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
 }
