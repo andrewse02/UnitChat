@@ -154,23 +154,60 @@ div, main, section {
         }
 
         .feature {
+            position: relative;
             opacity: 0;
             height: 0;
             width: 0;
 
             transform: translateY(-100%);
 
-            background: url("/img/UnitChat-logo.svg");
-            background-repeat: no-repeat;
+            video {
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                object-fit: contain;
+            }
+        }
 
-            &.reveal {
-                animation: reveal ease-in 1s forwards;
+        #feature-1 {
+            .reveal {
+                animation: reveal-1 ease-in 1s forwards;
             }
 
-            &.hide {
+            .hide {
                 opacity: 1;
-                height: 430px;
-                width: 430px;
+                height: 341px;
+                width: 935px;
+                transform: translateY(10%);
+
+                animation: reveal-reverse ease-in 1s forwards;
+            }
+        }
+
+        #feature-2 {
+            .reveal {
+                animation: reveal-2 ease-in 1s forwards;
+            }
+
+            .hide {
+                opacity: 1;
+                height: 178px;
+                width: 852px;
+                transform: translateY(10%);
+
+                animation: reveal-reverse ease-in 1s forwards;
+            }
+        }
+
+        #feature-3 {
+            .reveal {
+                animation: reveal-3 ease-in 1s forwards;
+            }
+
+            .hide {
+                opacity: 1;
+                height: 400px;
+                width: 500px;
                 transform: translateY(10%);
 
                 animation: reveal-reverse ease-in 1s forwards;
@@ -684,15 +721,41 @@ button {
     }
 }
 
-@keyframes reveal {
+@keyframes reveal-1 {
     80% {
         opacity: 0;
     }
     
     to {
         opacity: 1;
-        height: 430px;
-        width: 430px;
+        height: 341px;
+        width: 935px;
+        transform: translateY(10%);
+    }
+}
+
+@keyframes reveal-2 {
+    80% {
+        opacity: 0;
+    }
+    
+    to {
+        opacity: 1;
+        height: 178px;
+        width: 852px;
+        transform: translateY(10%);
+    }
+}
+
+@keyframes reveal-3 {
+    80% {
+        opacity: 0;
+    }
+    
+    to {
+        opacity: 1;
+        height: 400px;
+        width: 500px;
         transform: translateY(10%);
     }
 }

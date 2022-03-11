@@ -130,21 +130,51 @@ div #features-list li, main #features-list li, section #features-list li {
   padding-bottom: 50px;
 }
 div #features-list .feature, main #features-list .feature, section #features-list .feature {
+  position: relative;
   opacity: 0;
   height: 0;
   width: 0;
   transform: translateY(-100%);
-  background: url("/img/UnitChat-logo.svg");
-  background-repeat: no-repeat;
 }
-div #features-list .feature.reveal, main #features-list .feature.reveal, section #features-list .feature.reveal {
-  -webkit-animation: reveal ease-in 1s forwards;
-          animation: reveal ease-in 1s forwards;
+div #features-list .feature video, main #features-list .feature video, section #features-list .feature video {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  -o-object-fit: contain;
+     object-fit: contain;
 }
-div #features-list .feature.hide, main #features-list .feature.hide, section #features-list .feature.hide {
+div #features-list #feature-1 .reveal, main #features-list #feature-1 .reveal, section #features-list #feature-1 .reveal {
+  -webkit-animation: reveal-1 ease-in 1s forwards;
+          animation: reveal-1 ease-in 1s forwards;
+}
+div #features-list #feature-1 .hide, main #features-list #feature-1 .hide, section #features-list #feature-1 .hide {
   opacity: 1;
-  height: 430px;
-  width: 430px;
+  height: 341px;
+  width: 935px;
+  transform: translateY(10%);
+  -webkit-animation: reveal-reverse ease-in 1s forwards;
+          animation: reveal-reverse ease-in 1s forwards;
+}
+div #features-list #feature-2 .reveal, main #features-list #feature-2 .reveal, section #features-list #feature-2 .reveal {
+  -webkit-animation: reveal-2 ease-in 1s forwards;
+          animation: reveal-2 ease-in 1s forwards;
+}
+div #features-list #feature-2 .hide, main #features-list #feature-2 .hide, section #features-list #feature-2 .hide {
+  opacity: 1;
+  height: 178px;
+  width: 852px;
+  transform: translateY(10%);
+  -webkit-animation: reveal-reverse ease-in 1s forwards;
+          animation: reveal-reverse ease-in 1s forwards;
+}
+div #features-list #feature-3 .reveal, main #features-list #feature-3 .reveal, section #features-list #feature-3 .reveal {
+  -webkit-animation: reveal-3 ease-in 1s forwards;
+          animation: reveal-3 ease-in 1s forwards;
+}
+div #features-list #feature-3 .hide, main #features-list #feature-3 .hide, section #features-list #feature-3 .hide {
+  opacity: 1;
+  height: 400px;
+  width: 500px;
   transform: translateY(10%);
   -webkit-animation: reveal-reverse ease-in 1s forwards;
           animation: reveal-reverse ease-in 1s forwards;
@@ -588,26 +618,70 @@ button.close:hover {
   order: 2;
 }
 
-@-webkit-keyframes reveal {
+@-webkit-keyframes reveal-1 {
   80% {
     opacity: 0;
   }
   to {
     opacity: 1;
-    height: 430px;
-    width: 430px;
+    height: 341px;
+    width: 935px;
     transform: translateY(10%);
   }
 }
 
-@keyframes reveal {
+@keyframes reveal-1 {
   80% {
     opacity: 0;
   }
   to {
     opacity: 1;
-    height: 430px;
-    width: 430px;
+    height: 341px;
+    width: 935px;
+    transform: translateY(10%);
+  }
+}
+@-webkit-keyframes reveal-2 {
+  80% {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+    height: 178px;
+    width: 852px;
+    transform: translateY(10%);
+  }
+}
+@keyframes reveal-2 {
+  80% {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+    height: 178px;
+    width: 852px;
+    transform: translateY(10%);
+  }
+}
+@-webkit-keyframes reveal-3 {
+  80% {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+    height: 400px;
+    width: 500px;
+    transform: translateY(10%);
+  }
+}
+@keyframes reveal-3 {
+  80% {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+    height: 400px;
+    width: 500px;
     transform: translateY(10%);
   }
 }

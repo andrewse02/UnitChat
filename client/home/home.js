@@ -82,7 +82,7 @@ const isLoggedIn = async () => {
 
     await axios.get("/auth", {headers: { Authorization: "Bearer " + localStorage.getItem("token") }})
     .then((res) => {
-        loggedIn = !!res.data;
+        loggedIn = res.data;
     });
 
     if(!loggedIn) localStorage.clear();
@@ -218,18 +218,18 @@ const checkTheme = async () => {
     }
 };
 
-features.forEach((feature) => {
-    const img = feature.querySelector("div");
+// features.forEach((feature) => {
+//     const img = feature.querySelector("div");
 
-    feature.addEventListener("mouseenter", (event) => {
-        img.classList.remove("hide");
-        img.classList.add("reveal");
-    });
+//     feature.addEventListener("mouseenter", (event) => {
+//         img.classList.remove("hide");
+//         img.classList.add("reveal");
+//     });
 
-    feature.addEventListener("mouseleave", (event) => {
-        img.classList.remove("reveal");
-        img.classList.add("hide");
-    });
-});
+//     feature.addEventListener("mouseleave", (event) => {
+//         img.classList.remove("reveal");
+//         img.classList.add("hide");
+//     });
+// });
 
 window.onload = checkTheme;

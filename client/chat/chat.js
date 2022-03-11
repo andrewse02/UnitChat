@@ -17,6 +17,7 @@ const messageInput = document.getElementById("message-input");
 let socket;
 
 const profilePictures = [];
+let globalTyping = [];
 
 const messageValidator = new UnderageValidate({
         errorMessageClass: "error",
@@ -36,7 +37,10 @@ const connect = async () => {
         alert(error);
     });
     
-    socket.emit("auth", localStorage.getItem("token"));
+    socket.on("init", async () => {
+        socket.emit("auth", localStorage.getItem("token"));
+    });
+
     socket.on("auth", async (res) => {
         socket.user = res.user;
         await populateConversaions(await getConversations());
@@ -68,15 +72,7 @@ const connect = async () => {
     });
 
     socket.on("typing", (typing) => {
-        typingFiltered = [...new Set([...typing].filter((element) => element.user.username !== socket.user.username && +conversationsSection.querySelectorAll(".conversation")[selectedConversation].dataset.groupId === +element.group).map((element) => element.user.username))];
-
-        if(typingFiltered.length < 1) {
-            typingIcon.style.display = "none";
-            return typingText.textContent = "";
-        }
-
-        typingText.textContent = typingFiltered.reduce((text, value, i) => text + (i < typing.length - 1 ? ", " : ", and ") + value) + " is typing...";
-        typingIcon.style.display = "block";
+        setTypingText(typing);
     });
 }
 
@@ -96,6 +92,20 @@ const isLoggedIn = async () => {
         window.location.replace("/");
     }
     return loggedIn;
+}
+
+const setTypingText = (typing) => {
+    typingFiltered = [...new Set([...typing].filter((element) => element.user.username !== socket.user.username && +conversationsSection.querySelectorAll(".conversation")[selectedConversation].dataset.groupId === +element.group).map((element) => element.user.username))];
+
+    if(typingFiltered.length < 1) {
+        typingIcon.style.display = "none";
+        return typingText.textContent = "";
+    }
+
+    typingText.textContent = typingFiltered.reduce((text, value, i) => text + (i < typing.length - 1 ? ", " : ", and ") + value) + " is typing...";
+    typingIcon.style.display = "block";
+
+    globalTyping = typingFiltered;
 }
 
 messageInputForm.addEventListener("submit", async (event) => {
@@ -120,10 +130,12 @@ messageInputForm.addEventListener("submit", async (event) => {
     messagesContainer.appendChild(newMessage);
     
     messageInput.value = "";
+    messagesContainer.scroll(0, messagesContainer.scrollHeight);
 });
 
 messageInput.addEventListener("input", (event) => {
     messageValidator.validate();
+    console.log(+conversationsSection.querySelectorAll(".conversation")[selectedConversation].dataset.groupId);
     socket.emit("typing", +conversationsSection.querySelectorAll(".conversation")[selectedConversation].dataset.groupId);
 });
 
@@ -144,7 +156,7 @@ const getNewConversationElement = async (conversation) => {
     newConversation.appendChild(conversationName);
 
     newConversation.addEventListener("click", async (event) => {
-        await selectConversation(Array.prototype.indexOf.call(event.target.parentNode.querySelectorAll(".conversation"), newConversation));
+        await selectConversation(await Array.prototype.indexOf.call(await conversationsSection.querySelectorAll(".conversation"), newConversation));
     });
 
     return newConversation;
@@ -301,7 +313,7 @@ const populateConversaions = async (conversations) => {
 };
 
 const selectConversation = async (index) => {
-    const conversations = conversationsSection.querySelectorAll(".conversation");
+    const conversations = await conversationsSection.querySelectorAll(".conversation");
     if(conversations[index].classList.contains("selected")) return;
     
     const selectedConversations = conversationsSection.querySelectorAll(".selected");

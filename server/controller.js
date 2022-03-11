@@ -351,15 +351,28 @@ const deleteMessage = async (socket, id) => {
     });
 };
 
-const checkAuth = (req, res) => {
+const checkAuth = async (req, res) => {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
     if (token == null) return res.status(200).send(false);
 
-    jwt.verify(token, secret, (error, user) => {
+    jwt.verify(token, secret, async (error, user) => {
         if (error) return res.status(200).send(false);
 
-        res.status(200).send(!!user);
+        let result;
+        let shouldError = false;
+        await sequelize.query(`
+        SELECT user_id FROM users
+        WHERE user_id = ${user?.user_id}`).then((dbRes) => {
+            result = dbRes[0].length > 0;
+        })
+        .catch((error) => {
+            console.log(error);
+            shouldError = true;
+        });
+
+        if(shouldError) return res.sendStatus(500);
+        res.status(200).send(result);
     });
 }
 
@@ -382,6 +395,7 @@ const onConnection = (socket) => {
     io = require("./index.js").io;
 
     console.log("A client has connected.");
+    socket.emit("init");
     
     socket.on("auth", async (recievedToken) => {
         const authResponse = authorizeSocket(recievedToken);
@@ -438,8 +452,12 @@ const onConnection = (socket) => {
     });
 
     socket.on("delete", async (id) => {
-        const authResponse = authorizeSocket(socket.user.token);
-        if(authResponse.error) return socket.emit("error", authResponse.error);
+        try {
+            const authResponse = authorizeSocket(socket.user.token);
+            if(authResponse.error) return socket.emit("error", authResponse.error);
+        } catch (error) {
+            console.log(error);
+        }
 
         await deleteMessage(socket, id);
         socket.broadcast.emit("delete", id);
