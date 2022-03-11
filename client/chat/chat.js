@@ -43,6 +43,11 @@ const connect = async () => {
         await selectConversation(0);
     });
 
+    socket.on("conversation", async () => {
+        console.log("hit");
+        await populateConversaions(await getConversations());
+    });
+
     socket.on("message", async (message) => {
 
         const newMessage = await getNewMessageElement(message);
@@ -400,12 +405,14 @@ overlay.addEventListener("click", (event) => {
 });
 
 usernameField.addEventListener("input", async (event) => {
-    const results = await searchUsers(usernameField.value);
-    if(results.length < 1) return;
+    const results = await(await searchUsers(usernameField.value));
+    if(results.length < 1) return usernameResults.style.display = "none";
 
     while (usernameResults.hasChildNodes()) {
         usernameResults.removeChild(usernameResults.firstChild);
     }
+
+    if(results.map((user) => user.username.toLowerCase()).includes(socket.user.username.toLowerCase())) return usernameResults.style.display = "none";
 
     usernameResults.style.display = "flex";
 

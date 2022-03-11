@@ -18,8 +18,9 @@
     <body>
         <main class="container align-center">
             <div id="overlay"></div>
+            <div id="header-background"></div>
 
-            <section id="header-container" class="container between align-center primary">
+            <section id="header-container" class="container between align-center transparent">
                 <header class="container-h between">
                     <nav class="container-h mid-links center" data-aos="fade-right" data-aos-once="true">
                         <a href="#about">About</a>
@@ -31,31 +32,40 @@
                     </div>
                 </header>
 
-                <h1 class="title" data-aos="fade-down" data-aos-duration="2500" data-aos-once="true">Unit Chat</h1>
+                    <h1 class="title" data-aos="fade-down" data-aos-duration="2500" data-aos-once="true">Unit Chat</h1>
             </section>
+            
+            <img class="logo" src="/img/UnitChat-logo.svg" alt="logo" data-aos="fade-in" data-aos-delay="1500" data-aos-once="true">
 
             <section id="about" class="container center align-start" data-aos="fade-right">
-                <div class="container-h start">
-                    <h1>About</h1>
-                    <img class="logo" src="/img/UnitChat-logo.svg" alt="logo">
-                </div>
-                <br><br>
-
-                <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Possimus enim porro inventore repellendus suscipit perferendis ullam aliquid optio quam tempora, ea rerum ad placeat itaque corrupti distinctio consequuntur quasi hic ut. Officia officiis corporis laudantium molestiae unde explicabo maxime provident sint numquam adipisci aliquid, nobis impedit? Et amet officiis enim voluptate ab. Quaerat pariatur, consequatur animi iste cum doloribus, aliquid soluta iure culpa aut sint incidunt. Aspernatur repudiandae rem illum nihil ad quas eveniet accusantium delectus magnam, eius totam? Porro cumque assumenda libero mollitia nemo, quisquam blanditiis eius? Sequi quibusdam voluptatibus fugiat aspernatur, repellat distinctio. Quis, neque temporibus deserunt possimus praesentium ipsam tenetur laboriosam minima quod exercitationem voluptates libero maiores dolorem doloremque blanditiis repellendus vel architecto non dicta id harum. Facere amet natus quam totam libero nisi officia labore sint, voluptatem, molestiae quibusdam enim repellendus incidunt. Necessitatibus vero iure, saepe nihil animi odio neque cum magni placeat rem eius enim natus reprehenderit illo minima expedita id non dolorem quasi ab! Consequuntur, natus omnis aliquid nihil eius id quis qui facere tempore placeat dolor cumque quam, veniam voluptas! Vel, officia recusandae omnis eos, ullam reiciendis ea obcaecati quae laboriosam dolor voluptatem eum pariatur veritatis illum sequi voluptas, sit esse temporibus est.</p>
-                <br>
-                <p>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Nihil quis quibusdam recusandae mollitia consequuntur vitae commodi repudiandae voluptatem perferendis voluptates facere ipsum accusantium, sunt iusto doloremque natus unde odio officiis adipisci impedit nisi ab? Sint nam est quis reiciendis nemo amet, quidem fugiat possimus? In accusamus cum ea placeat iste id labore similique, laborum corrupti harum temporibus ut assumenda autem nihil sequi nisi ipsam. Ipsam reiciendis a expedita omnis vel dolores eius reprehenderit aperiam quos repellendus facere ullam sequi odit error accusantium, consectetur corporis, dolorem fugiat tenetur explicabo ea ex architecto? Minus, ipsum! Non at quos atque, provident corrupti illo unde sapiente animi iste error quas. Magni optio praesentium molestias, vel culpa quisquam repudiandae dolores ad dolore inventore corporis, cumque quod, doloremque labore fugiat? Accusantium neque dolore libero veritatis quasi. Molestiae ipsam vitae, dicta magnam eos optio culpa vel saepe ullam. Ipsum id voluptatum quae quas architecto ad consequatur expedita.</p>
+                <h1 class="primary">About</h1>
+                    
+                <p>We are a simple, sleek, chatting service. Interact with your friends, publicly or in private. <a href="#features">Explore</a> all the things you can do with Unit Chat!</p>
+                <p>This project was created to present as a capstone for Devmountain to display the skills learned while enrolled.</p>
+                <p>Unit Chat is <a href="https://github.com/andrewse02/UnitChat">open-source</a> and was built on various technologies. Such as: Node.js, Express, Socket.IO, JsonWebToken, <a href="https://github.com/andrewse02/underage-validate">UnderageValidate</a> and many more.</p>
             </section>
 
             <section id="features" class="container center align-start" data-aos="fade-left">
-                <h1>Features</h1>
-                <br><br>
+                <h1 class="primary">Features</h1>
 
-                <ul>
-                    <li><h4>Lorem ipsum dolor, sit amet consectetur adipisicing elit. Assumenda nulla non corporis nostrum soluta ipsam nobis, quod aliquid. Nesciunt, expedita dolorum odio harum est consequuntur dolorem voluptatem similique! Corporis, ipsam?</h4></li>
+                <ul id="features-list">
+                    <li>
+                        <h4>Send and recieve messages in real-time</h4>
+                        <p>You'll know when a user is typing, and you'll recieve their message at almost the instant they send it</p>
+                        <div class="feature"></div>
+                    </li>
                     <br>
-                    <li><h4>Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius, pariatur! Voluptatibus quo magnam blanditiis, error, explicabo maxime hic quasi voluptates, sunt est repellendus provident obcaecati ipsam atque? Officiis, quibusdam debitis.</h4></li>
+                    <li>
+                        <h4>Edit or delete messages</h4>
+                        <p>Simply hover over a message that you sent, and click the edit or delete buttons</p>
+                        <div class="feature"></div>
+                    </li>
                     <br>
-                    <li><h4>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Tempore est, dolorum nam assumenda quaerat eveniet ea nesciunt perspiciatis consequatur reprehenderit, similique itaque illo in vel id dicta eum adipisci provident.</h4></li>
+                    <li>
+                        <h4>Start a private conversation</h4>
+                        <p>Click the new conversation icon on the bottom left, type the usernmae, and start chatting</p>
+                        <div class="feature"></div>
+                    </li>
                     <br>
                 </ul>
             </section>

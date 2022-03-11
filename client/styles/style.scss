@@ -49,6 +49,7 @@ $colors: (
 body, main, section {
     background-color: var(--color-middleDark);
     margin: 0;
+    overflow-x: hidden;
 }
 
 main {
@@ -63,6 +64,10 @@ h1, h2, h3, h4, h5, h6, p, label {
 
     a {
         cursor: pointer;
+        color: var(--color-primary);
+    }
+
+    &.primary {
         color: var(--color-primary);
     }
 }
@@ -91,14 +96,19 @@ h6 {
     font-size: 0.8rem;
 }
 
+p {
+    line-height: 1.5rem;
+}
+
 .title {
     font-size: 5rem;
 }
 
 img {
     &.logo {
-        height: 100px;
-        width: 100px;
+        z-index: 5;
+        height: 180px;
+        width: 180px;
     }
 }
 
@@ -124,12 +134,53 @@ a {
 }
 
 div, main, section {
+    position: relative;
+
     &#overlay {
         display: none;
         position: fixed;
         height: 100vh;
         width: 100vw;
+        z-index: 9;
         background-color: rgba($color: #000000, $alpha: 0.5);
+    }
+
+    #features-list {
+        padding: 0;
+        list-style: none;
+
+        li {
+            padding-bottom: 50px;
+        }
+
+        .feature {
+            opacity: 0;
+            height: 0;
+            width: 0;
+
+            transform: translateY(-100%);
+
+            background: url("/img/UnitChat-logo.svg");
+            background-repeat: no-repeat;
+
+            &.reveal {
+                animation: reveal ease-in 1s forwards;
+            }
+
+            &.hide {
+                opacity: 1;
+                height: 430px;
+                width: 430px;
+                transform: translateY(10%);
+
+                animation: reveal-reverse ease-in 1s forwards;
+            }
+        }
+    }
+
+    &.primary {
+        color: var(--color-neutralLight);
+        background-color: var(--color-primary);
     }
 
     &.highlight1 {
@@ -137,9 +188,8 @@ div, main, section {
         background-color: var(--color-highlight1);
     }
 
-    &.primary {
-        color: var(--color-neutralLight);
-        background-color: var(--color-primary);
+    &.transparent {
+        background-color: transparent;
     }
 }
 
@@ -147,14 +197,23 @@ ul {
     color: var(--color-neutralLight);
 }
 
+#header-background {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 735px;
+    width: 2500px;
+    transform: translate(200px, -335px) rotate(7deg);
+    overflow: hidden;
+
+    background-color: var(--color-primary);
+}
+
 #header-container {
     height: 400px;
     width: 100vw;
-    padding-bottom: 100px;
-    // height: 0;
-    // width: 0;
-    // border-bottom: 400px solid $primary;
-    // border-left: 100vw solid red;
+    margin-bottom: 40px;
+    z-index: 5;
 }
 
 header {
@@ -326,7 +385,7 @@ button {
 }
 
 #about {
-    margin-top: 30vh;
+    margin-top: 40vh;
     width: 50vw;
 
     .container-h {
@@ -399,7 +458,6 @@ button {
 #message-input-container {
     width: 100%;
     margin: 0 auto;
-    // padding-bottom: 15px;
     position: relative;
     z-index: 1;
     background-color: var(--color-middleDark);
@@ -623,6 +681,32 @@ button {
         .message-user-info {
             order: 2
         }
+    }
+}
+
+@keyframes reveal {
+    80% {
+        opacity: 0;
+    }
+    
+    to {
+        opacity: 1;
+        height: 430px;
+        width: 430px;
+        transform: translateY(10%);
+    }
+}
+
+@keyframes reveal-reverse {
+    20% {
+        opacity: 0;
+    }
+    
+    to {
+        opacity: 0;
+        height: 0;
+        width: 0;
+        transform: translateY(-100%);
     }
 }
 

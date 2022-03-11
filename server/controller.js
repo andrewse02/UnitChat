@@ -168,7 +168,6 @@ const getConversations = (req, res) => {
         const data = dbRes[0].map(row => {
             return { group_id: row.group_id, group_name: row.name, private: row.private, user_id: row.user_id };
         });
-        console.log(data);
         return res.status(200).send(data);
     })
     .catch((error) => {
@@ -272,6 +271,11 @@ const createConversation = async (req, res) => {
     });
     if(shouldError) return;
 
+    for(const [_, socket] of io.of("/").sockets) {
+        if(+socket.user.user_id !== +id) continue;
+        socket.emit("conversation");
+    }
+    
     return res.status(200).send(result);
 };
 

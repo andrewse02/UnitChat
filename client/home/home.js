@@ -1,6 +1,8 @@
 const startChatting = document.getElementById("start-chatting");
 const overlay = document.getElementById("overlay");
 
+const features = document.getElementById("features-list").querySelectorAll("li");
+
 const loginForm = document.getElementById("login-form");
 const loginUsername = document.getElementById("login-username");
 const loginPassword = document.getElementById("login-password");
@@ -214,6 +216,20 @@ const checkTheme = async () => {
                 console.log(error);
             });
     }
-}
+};
+
+features.forEach((feature) => {
+    const img = feature.querySelector("div");
+
+    feature.addEventListener("mouseenter", (event) => {
+        img.classList.remove("hide");
+        img.classList.add("reveal");
+    });
+
+    feature.addEventListener("mouseleave", (event) => {
+        img.classList.remove("reveal");
+        img.classList.add("hide");
+    });
+});
 
 window.onload = checkTheme;
