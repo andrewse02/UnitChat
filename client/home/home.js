@@ -189,8 +189,8 @@ const loginEvent = (event) => {
             }
 
             if(error.response.status === 401) {
-                registerValidator.invalidateField(loginUsername.id, "Username or password is incorrect!");
-                return registerValidator.invalidateField(loginPassword.id, "Username or password is incorrect!");
+                loginValidator.invalidateField(loginUsername.id, "Username or password is incorrect!");
+                return loginValidator.invalidateField(loginPassword.id, "Username or password is incorrect!");
             }
 
             console.log(error);
