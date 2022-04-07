@@ -204,8 +204,8 @@ const loginEvent = (event) => {
             }
 
             if(error.response.status === 401) {
-                registerValidator.invalidateField(loginUsername.id, "Username or password is incorrect!");
-                return registerValidator.invalidateField(loginPassword.id, "Username or password is incorrect!");
+                loginValidator.invalidateField(loginUsername.id, "Username or password is incorrect!");
+                return loginValidator.invalidateField(loginPassword.id, "Username or password is incorrect!");
             }
 
             console.log(error);
@@ -222,7 +222,7 @@ const checkTheme = async () => {
     if (localStorage.getItem("token")) {
         await axios.get("/user", { headers: { Authorization: "Bearer " + localStorage.getItem("token") } })
             .then((res) => {
-                if (res.data.username.toLowerCase().includes("joely") || res.data.username.toLowerCase().includes("vernier")) {
+                if (res.data.username.toLowerCase().includes("joely") || res.data.username.toLowerCase().includes("vernier") || res.data.username.toLowerCase().includes("vernionator")) {
                     document.documentElement.style.setProperty("--color-primary", "#FF1F1F");
                     document.documentElement.style.setProperty("--color-highlight1", "#830000");
                 }

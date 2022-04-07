@@ -43,8 +43,24 @@ body, main, section {
   overflow-x: hidden;
 }
 
-main.container, main.search-results {
-  overflow: scroll;
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: var(--color-secondary);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary);
 }
 
 h1, h2, h3, h4, h5, h6, p, label {
@@ -502,12 +518,13 @@ button.close:hover {
 
 #messages-container {
   height: 100%;
-  overflow: scroll;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 #conversations-section {
   position: relative;
-  overflow: scroll;
+  overflow-y: auto;
 }
 
 #new-conversation-container {
