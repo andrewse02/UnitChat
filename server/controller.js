@@ -3,6 +3,7 @@ const secret = process.env.ACCESS_TOKEN_SECRET;
 const jwt = require("jsonwebtoken");
 const path = require("path");
 const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 const Sequelize = require("sequelize");
 const connection_string = process.env.DATABASE_URL;
@@ -20,6 +21,9 @@ let io;
 const port = process.env.PORT || 4000;
 
 let typing = [];
+
+// [{id: code}]
+let authRequests = [];
 
 const serveHome = (req, res) => {
     res.sendFile(path.resolve("client/home/home.html"));
@@ -139,6 +143,58 @@ const getUsers = async (req, res) => {
     });
 
     if(result) res.status(200).send(result);
+};
+
+const getAuthRequests = (req, res) => {
+    const { id } = req.params;
+    if(!id) return res.status(400).send("Missing user ID!");
+
+    if(+req.user.user_id !== +id) return res.status(403).send("You are not authorized to access authorization requests for this user!");
+
+    const found = authRequests.find(request => request[id] != null)
+    if(found == null) return res.status(404).send("No authorization request for this user was found!");
+
+    console.log(`\nSuccessfully fetched requets\n${+id}\n`);
+    return res.status(200).send(+id);
+};
+
+const createAuthRequest = (req, res) => {
+    const { id } = req.params;
+    if(!id) return res.status(400).send("Missing user ID!");
+
+    if(+req.user.user_id !== +id) return res.status(403).send("You are not authorized to access authorization requests for this user!");
+
+    const code = crypto.randomBytes(3).toString("hex").toUpperCase();
+
+    const found = authRequests.find((request) => request[id] != null);
+    if(found == null) {
+        const request = {};
+        request[id] = code
+        authRequests.push(request);
+    } else {
+        found[id] = code;
+    }    
+    
+    console.log(`\nSuccessfully created request for ${+id} with code ${code}\n`);
+    return res.status(200).send(code);
+};
+
+const postAuthResponse = (req, res) => {
+    const { id } = req.params;
+    const { code } = req.body;
+
+    if(!id) return res.status(400).send("Missing user ID!");
+
+    if(+req.user.user_id !== +id) return res.status(403).send("You are not authorized to post an authorization response for this user!");
+
+    const found = authRequests.find((request) => request[id] === code);
+    if(found == null || !code) res.status(403).send("Incorrect or invalid code!");
+
+    res.sendStatus(200);
+
+    // socket event
+    console.log("\nSuccessfully authenticated\n");
+    sendAuthResponse(+id, req.user.token);
 };
 
 const getProfilePicture = async (req, res) => {
@@ -520,6 +576,10 @@ const authorizeSocket = (token) => {
     return res;
 };
 
+const sendAuthResponse = (id, token) => {
+    io.to(`auth-${id}`).emit("auth-response", token);
+};
+
 module.exports = {
     port,
     serveHome,
@@ -528,6 +588,9 @@ module.exports = {
     register,
     getUser,
     getUsers,
+    getAuthRequests,
+    createAuthRequest,
+    postAuthResponse,
     getProfilePicture,
     getConversations,
     getConversationUsers,

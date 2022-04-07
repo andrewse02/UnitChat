@@ -18,6 +18,8 @@ const registerConfirmPassword = document.getElementById("register-confirm-passwo
 const loginInputs = [loginUsername, loginPassword];
 const registerInputs = [registerFirst, registerLast, registerEmail, registerUsername, registerPassword, registerConfirmPassword];
 
+let socket;
+
 AOS.init({
     duration: 1500
 });
@@ -75,6 +77,19 @@ const registerValidator = new UnderageValidate({
         required: true,
         message: "Passwords do not match!"
     });
+
+const connect = async () => {
+    socket = io();
+
+    socket.on("error", (error) => {
+        console.log(error);
+        alert(error);
+    });
+
+    socket.on("auth-response", (token) => {
+        login(token);
+    });
+}
 
 const isLoggedIn = async () => {
     if(!localStorage.getItem("token")) return false;
