@@ -129,7 +129,7 @@ const getUser = async (req, res) => {
 const getUsers = async (req, res) => {
     let { username } = req.query;
     if(!username || username === "") return res.status(200).send([]);
-    
+
     let result;
 
     await sequelize.query(`
@@ -173,8 +173,8 @@ const createAuthRequest = (req, res) => {
         authRequests.push(request);
     } else {
         found[id] = code;
-    }    
-    
+    }
+
     console.log(`\nSuccessfully created request for ${+id} with code ${code}\n`);
     return res.status(200).send(code);
 };
@@ -235,7 +235,7 @@ const getConversations = (req, res) => {
 const getConversationUsers = async (req, res) => {
     const { id } = req.params;
     if(!id) return res.status(400).send("Group ID missing!")
-    
+
     let result;
     let shouldError = false;
 
@@ -300,7 +300,7 @@ const createConversation = async (req, res) => {
         return res.sendStatus(500)
     });
     if(shouldError) return;
-    
+
     await sequelize.query(`
     INSERT INTO groups (name, private, created)
     VALUES('${sequelize.escape(req.user.username).replace(/\'/g, "")},${sequelize.escape(username).replace(/\'/g, "")}', true, NOW())
@@ -331,7 +331,7 @@ const createConversation = async (req, res) => {
         if(+socket.user.user_id !== +id) continue;
         socket.emit("conversation");
     }
-    
+
     return res.status(200).send(result);
 };
 
@@ -352,7 +352,7 @@ const getMessages = async (req, res) => {
         console.log(error);
         shouldError = true;
     });
-    
+
     if(shouldError) return res.sendStatus(500);
     if(!inGroup) return res.status(403).send("You are not in this group!");
 
@@ -441,7 +441,7 @@ const authorizeUser = (req, res, next) => {
         if(error) {
             return res.status(403).send("Unauthorized token provided!");
         }
-        
+
         req.user = user;
         next();
     });
@@ -452,7 +452,7 @@ const onConnection = (socket) => {
 
     console.log("A client has connected.");
     socket.emit("init");
-    
+
     socket.on("auth", async (recievedToken) => {
         const authResponse = authorizeSocket(recievedToken);
         if (authResponse.error) {
@@ -475,7 +475,7 @@ const onConnection = (socket) => {
             username: socket.user.username,
             user_id: socket.user.user_id,
             text: message,
-            created: new Date(Date.now()).toString(),
+            created: new Date().toISOString(),
         };
 
         sequelize.query(`
@@ -522,9 +522,9 @@ const onConnection = (socket) => {
     socket.on("typing", async (groupId) => {
         const authResponse = authorizeSocket(socket.user.token);
         if(authResponse.error) return socket.emit("error", authResponse.error);
-        
+
         const typingEntry = { data: {user: authResponse.user, group: +groupId} };
-        
+
         let foundIndex = typing.findIndex((element) => +element.data.user.id === +authResponse.user.id);
 
         if (!typing[foundIndex]) {
@@ -544,10 +544,10 @@ const onConnection = (socket) => {
         typingEntry.timeout = setTimeout(() => {
             typing = typing.filter((element) => element.user.id !== authResponse.user.id);
             result = typing.map((object) => object.data);
-            
+
             io.emit("typing", result);
         }, 5000);
-        
+
         foundIndex = typing.findIndex((element) => +element.data.user.id === +authResponse.user.id);
         typing[foundIndex] = typingEntry;
     });
@@ -563,7 +563,7 @@ const authorizeSocket = (token) => {
         res.error = "Invalid/no token provided!";
         return res;
     }
-    
+
     jwt.verify(token, secret, (error, user) => {
         if(error) {
             res.error = "Unauthorized token provided!";

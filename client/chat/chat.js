@@ -36,7 +36,7 @@ const connect = async () => {
         console.log(error);
         alert(error);
     });
-    
+
     socket.on("init", async () => {
         socket.emit("auth", localStorage.getItem("token"));
     });
@@ -114,7 +114,7 @@ messageInputForm.addEventListener("submit", async (event) => {
 
     if(messageInput.value === "") return;
     if(!messageValidator.validate()) return;
-    
+
     socket.emit("message", conversationsSection.querySelectorAll(".conversation")[selectedConversation].dataset.groupId, messageInput.value);
 
     const messages = await getMessages(conversationsSection.querySelectorAll(".conversation")[selectedConversation].dataset.groupId);
@@ -123,12 +123,12 @@ messageInputForm.addEventListener("submit", async (event) => {
         username: socket.user.username,
         user_id: socket.user.user_id,
         text: messageInput.value,
-        created: new Date(Date.now())
+        created: new Date().toISOString()
     });
     newMessage.style = "animation: message-outgoing 850ms ease-in;";
 
     messagesContainer.appendChild(newMessage);
-    
+
     messageInput.value = "";
     messagesContainer.scroll(0, messagesContainer.scrollHeight);
 });
@@ -231,7 +231,7 @@ const getNewMessageElement = async (message) => {
                     text: editInput.value.trim()
                 });
             });
-            
+
             messageBubble.insertBefore(editForm, messageInfo);
             editInput.focus();
         });
@@ -315,7 +315,7 @@ const populateConversaions = async (conversations) => {
 const selectConversation = async (index) => {
     const conversations = await conversationsSection.querySelectorAll(".conversation");
     if(conversations[index].classList.contains("selected")) return;
-    
+
     const selectedConversations = conversationsSection.querySelectorAll(".selected");
     for(let i = 0; i < selectedConversations.length; i++) {
         selectedConversations[i].classList.remove("selected");
@@ -439,7 +439,7 @@ usernameField.addEventListener("input", async (event) => {
 
         const resultTitle = document.createElement("h5");
         resultTitle.textContent = results[i].username;
-        
+
         resultButton.appendChild(resultPic);
         resultButton.appendChild(resultTitle);
 
@@ -454,7 +454,7 @@ usernameField.addEventListener("input", async (event) => {
             createConversation(usernameField.value);
             hideModals();
         });
-        
+
         fragment.appendChild(resultButton);
     }
 
