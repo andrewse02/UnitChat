@@ -381,8 +381,10 @@ const editMessage = async (socket, message) => {
     WHERE message_id = ${message.message_id} AND user_id = ${socket.user.user_id}
     RETURNING *;`)
     .then((dbRes) => {
-        if(!dbRes[0][0]) return socket.emit("error", "You did not send this message!");
-        io.emit("edit", dbRes[0][0]);
+        if(!dbRes[0][0]) {
+            socket.emit("error", "You did not send this message!");
+            return { error: "You did not send this message!" }
+        }
     })
     .catch((error) => {
         console.log(error);
@@ -503,8 +505,8 @@ const onConnection = (socket) => {
         const authResponse = authorizeSocket(socket.user.token);
         if(authResponse.error) return socket.emit("error", authResponse.error);
 
-        await editMessage(socket, message);
-        socket.broadcast.emit("edit", message);
+        let edit = await editMessage(socket, message);
+        if(!edit?.error) socket.broadcast.emit("edit", message);
     });
 
     socket.on("delete", async (id) => {

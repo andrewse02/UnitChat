@@ -227,7 +227,7 @@ const getNewMessageElement = async (message) => {
                 editButton.removeAttribute("style");
                 messageContent.removeAttribute("style");
                 await socket.emit("edit", {
-                    message_id: newMessage.dataset.messageId,
+                    message_id: +newMessage.dataset.messageId,
                     text: editInput.value.trim()
                 });
             });
