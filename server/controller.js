@@ -504,7 +504,7 @@ const onConnection = (socket) => {
         if(authResponse.error) return socket.emit("error", authResponse.error);
 
         await editMessage(socket, message);
-        socket.broadcast.emit("edit", id);
+        socket.broadcast.emit("edit", message);
     });
 
     socket.on("delete", async (id) => {
